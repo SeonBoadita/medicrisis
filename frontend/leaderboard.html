@@ -1,234 +1,468 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>mediCrisis — Live Leaderboard</title>
-<meta name="description" content="mediCrisis VR Medical Simulation Live Leaderboard — Ignite 26">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      fontFamily: { doto: ['Doto'], inter: ['Inter'] }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mediCrisis — Live Leaderboard</title>
+  <meta name="description" content="mediCrisis VR Medical Simulation Live Leaderboard — Ignite 26">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+  <script
+    type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { doto: ['Doto'], inter: ['Inter'] }
+        }
+      }
     }
-  }
-}
-</script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
-body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      cursor: none !important;
+    }
 
-/* Custom VR Surgical Reticle Cursor (Copied from index) */
-#vr-cursor { position: fixed; top: 0; left: 0; width: 32px; height: 32px; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); mix-blend-mode: difference; transition: width 0.3s, height 0.3s; }
-#vr-cursor .crosshair-x { position: absolute; top: 50%; left: -10px; right: -10px; height: 1px; background: rgba(255,255,255,0.8); transform: translateY(-50%); transition: all 0.3s; }
-#vr-cursor .crosshair-y { position: absolute; left: 50%; top: -10px; bottom: -10px; width: 1px; background: rgba(255,255,255,0.8); transform: translateX(-50%); transition: all 0.3s; }
-#vr-cursor .brackets { position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; clip-path: polygon(0 0, 20% 0, 20% 100%, 0 100%, 0 0, 100% 0, 100% 100%, 80% 100%, 80% 0, 100% 0); transition: all 0.3s; }
-#vr-cursor.hover { width: 48px; height: 48px; }
-#vr-cursor.hover .crosshair-x { left: 10px; right: 10px; background: rgba(255,255,255,1); }
-#vr-cursor.hover .crosshair-y { top: 10px; bottom: 10px; background: rgba(255,255,255,1); }
-#vr-cursor.hover .brackets { border-color: rgba(255,255,255,1); animation: spin 4s linear infinite; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
+    body {
+      background: #ffffff;
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-/* Three.js Grid Canvas */
-#grid-canvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
+    /* Custom VR Surgical Reticle Cursor (Copied from index) */
+    #vr-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+      transition: width 0.3s, height 0.3s;
+    }
 
-/* Light Theme Glass */
-.glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.06); }
+    #vr-cursor .crosshair-x {
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      right: -10px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateY(-50%);
+      transition: all 0.3s;
+    }
 
-/* Floating Glassmorphism Navbar (Matching index) */
-.navbar { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 100; width: 95%; max-width: 1400px; padding: 1rem 2.5rem; border-radius: 100px; background: rgba(255, 255, 255, 0.001); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    #vr-cursor .crosshair-y {
+      position: absolute;
+      left: 50%;
+      top: -10px;
+      bottom: -10px;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateX(-50%);
+      transition: all 0.3s;
+    }
 
-::selection { background: #000; color: #fff; }
-.player-row { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.06); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease; }
-.player-row:hover { transform: scale(1.01) translateX(4px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); }
+    #vr-cursor .brackets {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 4px;
+      clip-path: polygon(0 0, 20% 0, 20% 100%, 0 100%, 0 0, 100% 0, 100% 100%, 80% 100%, 80% 0, 100% 0);
+      transition: all 0.3s;
+    }
 
-.rank-badge { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
-.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
-.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #fff; }
-.rank-3 { background: linear-gradient(135deg, #cd7f32, #b8860b); color: #fff; }
-.rank-default { background: rgba(0,0,0,0.05); color: #000; border: 1px solid rgba(0,0,0,0.1); }
+    #vr-cursor.hover {
+      width: 48px;
+      height: 48px;
+    }
 
-.status-badge { padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-.status-completed { background: rgba(0,0,0,0.05); color: #000; border: 1px solid rgba(0,0,0,0.1); }
-.status-stopped { background: rgba(255,59,92,0.1); color: #ff3b5c; border: 1px solid rgba(255,59,92,0.2); }
-.status-left { background: rgba(107,114,128,0.1); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); }
+    #vr-cursor.hover .crosshair-x {
+      left: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 1);
+    }
 
-.score-ring { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
-.score-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.stat-value { font-family: 'Doto', monospace; }
+    #vr-cursor.hover .crosshair-y {
+      top: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 1);
+    }
 
-.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
-.scroll-container::-webkit-scrollbar { display: none; }
+    #vr-cursor.hover .brackets {
+      border-color: rgba(255, 255, 255, 1);
+      animation: spin 4s linear infinite;
+    }
 
-.new-entry { animation: newGlow 1.5s ease-out; }
-@keyframes newGlow { 0% { box-shadow: 0 0 40px rgba(0,0,0,0.1); border-color: #000; } 100% { box-shadow: none; } }
-.pulse-dot { width: 8px; height: 8px; background: #000; border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.2); } 50% { box-shadow: 0 0 0 8px rgba(0,0,0,0); } }
-</style>
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Three.js Grid Canvas */
+    #grid-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Light Theme Glass */
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* Floating Glassmorphism Navbar (Matching index) */
+    .navbar {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: 95%;
+      max-width: 1400px;
+      padding: 1rem 2.5rem;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.001);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    ::selection {
+      background: #000;
+      color: #fff;
+    }
+
+    .player-row {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+    }
+
+    .player-row:hover {
+      transform: scale(1.01) translateX(4px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    .rank-badge {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .rank-1 {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+    }
+
+    .rank-2 {
+      background: linear-gradient(135deg, #94a3b8, #cbd5e1);
+      color: #fff;
+    }
+
+    .rank-3 {
+      background: linear-gradient(135deg, #cd7f32, #b8860b);
+      color: #fff;
+    }
+
+    .rank-default {
+      background: rgba(0, 0, 0, 0.05);
+      color: #000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .status-badge {
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-completed {
+      background: rgba(0, 0, 0, 0.05);
+      color: #000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .status-stopped {
+      background: rgba(255, 59, 92, 0.1);
+      color: #ff3b5c;
+      border: 1px solid rgba(255, 59, 92, 0.2);
+    }
+
+    .status-left {
+      background: rgba(107, 114, 128, 0.1);
+      color: #6b7280;
+      border: 1px solid rgba(107, 114, 128, 0.2);
+    }
+
+    .score-ring {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .score-ring svg {
+      position: absolute;
+      inset: 0;
+      transform: rotate(-90deg);
+    }
+
+    .stat-value {
+      font-family: 'Doto', monospace;
+    }
+
+    .scroll-container {
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      display: none;
+    }
+
+    .new-entry {
+      animation: newGlow 1.5s ease-out;
+    }
+
+    @keyframes newGlow {
+      0% {
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+        border-color: #000;
+      }
+
+      100% {
+        box-shadow: none;
+      }
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #000;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(0, 0, 0, 0);
+      }
+    }
+  </style>
 </head>
-<body class="flex flex-col min-h-screen">
-<canvas id="grid-canvas"></canvas>
 
-<!-- Custom VR Cursor -->
-<div id="vr-cursor">
-  <div class="crosshair-x"></div>
-  <div class="crosshair-y"></div>
-  <div class="brackets"></div>
-</div>
+<body class="flex flex-col h-screen overflow-hidden">
+  <canvas id="grid-canvas"></canvas>
 
-<!-- ═══ NAVBAR (Matching index.html) ═══ -->
-<nav class="navbar flex items-center justify-between" id="navbar">
-  <div class="flex items-center gap-4">
-    <a href="index.html" class="flex items-center gap-3 group">
-      <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform" style="filter: brightness(0);">
-      <span class="font-doto text-3xl font-bold tracking-wider text-black">medi<span class="font-black">Crisis</span></span>
-    </a>
+  <!-- Custom VR Cursor -->
+  <div id="vr-cursor">
+    <div class="crosshair-x"></div>
+    <div class="crosshair-y"></div>
+    <div class="brackets"></div>
   </div>
-  <div class="hidden md:flex items-center gap-8 text-sm text-black/50 font-medium">
-    <a href="index.html" class="hover:text-black transition-colors">Home</a>
-    <a href="index.html#features" class="hover:text-black transition-colors">Features</a>
-    <a href="leaderboard.html" class="text-black font-semibold">Leaderboard</a>
-    <a href="index.html#cta" class="hover:text-black transition-colors">Play</a>
-  </div>
-  <div class="flex items-center gap-4">
-    <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
-      <i class="fa-solid fa-users text-black/40"></i>
-      <span class="stat-value font-bold text-black">0</span> Surgeons
+
+  <!-- ═══ NAVBAR (Matching index.html) ═══ -->
+  <nav class="navbar flex items-center justify-between" id="navbar">
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform"
+          style="filter: brightness(0);">
+        <span class="font-doto text-3xl font-bold tracking-wider text-black">medi<span
+            class="font-black">Crisis</span></span>
+      </a>
     </div>
-    <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
-      <div class="pulse-dot"></div>
-      <span class="text-xs font-bold text-black tracking-wide">LIVE</span>
+    <div class="hidden md:flex items-center gap-8 text-sm text-black/50 font-medium">
+      <a href="index.html" class="hover:text-black transition-colors">Home</a>
+      <a href="index.html#features" class="hover:text-black transition-colors">Features</a>
+      <a href="leaderboard.html" class="text-black font-semibold">Leaderboard</a>
+      <a href="index.html#cta" class="hover:text-black transition-colors">Play</a>
     </div>
-  </div>
-</nav>
-
-<!-- ═══ MAIN ═══ -->
-<main class="relative z-10 flex-1 px-4 pt-28 pb-6 max-w-5xl mx-auto w-full">
-  <!-- Stats Bar -->
-  <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
-    <div class="glass rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-trophy text-black/30 mr-1"></i>Top Score</p>
-      <p id="topScore" class="stat-value text-2xl font-black text-black">—</p>
+    <div class="flex items-center gap-4">
+      <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
+        <i class="fa-solid fa-users text-black/40"></i>
+        <span class="stat-value font-bold text-black">0</span> Surgeons
+      </div>
+      <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
+        <div class="pulse-dot"></div>
+        <span class="text-xs font-bold text-black tracking-wide">LIVE</span>
+      </div>
     </div>
-    <div class="glass rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-bolt text-black/30 mr-1"></i>Avg Integrity</p>
-      <p id="avgScore" class="stat-value text-2xl font-black text-black">—</p>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="relative z-10 flex-1 px-4 pt-28 pb-3 max-w-7xl mx-auto w-full flex flex-col overflow-hidden">
+    <!-- Stats Bar -->
+    <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
+      <div class="glass rounded-2xl p-4 text-center">
+        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-trophy text-black/30 mr-1"></i>Top Score</p>
+        <p id="topScore" class="stat-value text-2xl font-black text-black">—</p>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-bolt text-black/30 mr-1"></i>Avg Integrity</p>
+        <p id="avgScore" class="stat-value text-2xl font-black text-black">—</p>
+      </div>
+      <div class="glass rounded-2xl p-4 text-center">
+        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-check-double text-black/30 mr-1"></i>Success Rate</p>
+        <p id="successRate" class="stat-value text-2xl font-black text-black">—</p>
+      </div>
     </div>
-    <div class="glass rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-check-double text-black/30 mr-1"></i>Success Rate</p>
-      <p id="successRate" class="stat-value text-2xl font-black text-black">—</p>
+
+    <!-- Leaderboard Panel (Glass Container) -->
+    <div class="glass rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8">
+      <!-- Column Headers -->
+      <div class="flex items-center px-5 py-3 text-[0.65rem] text-black/40 uppercase tracking-widest font-bold border-b border-black/5">
+        <span class="w-14">Rank</span>
+        <span class="flex-1 ml-2">Surgeon</span>
+        <span class="w-20 text-center hidden sm:block">Integrity</span>
+        <span class="w-24 text-center hidden sm:block">Duration</span>
+        <span class="w-32 text-center">Status</span>
+      </div>
+
+      <!-- Leaderboard (only this scrolls) -->
+      <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
+        <div id="emptyState" class="rounded-2xl p-12 text-center">
+          <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4"></i>
+          <p class="text-black/50 text-sm font-medium">Awaiting surgeon data feed…</p>
+        </div>
+      </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Column Headers -->
-  <div class="flex items-center px-5 py-2 mb-2 text-[0.65rem] text-black/40 uppercase tracking-widest font-bold">
-    <span class="w-14">Rank</span>
-    <span class="flex-1 ml-2">Surgeon</span>
-    <span class="w-20 text-center hidden sm:block">Integrity</span>
-    <span class="w-24 text-center hidden sm:block">Duration</span>
-    <span class="w-32 text-center">Status</span>
-  </div>
-
-  <!-- Leaderboard -->
-  <div id="leaderboard" class="scroll-container flex flex-col gap-2">
-    <div id="emptyState" class="glass rounded-2xl p-12 text-center">
-      <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4"></i>
-      <p class="text-black/50 text-sm font-medium">Awaiting surgeon data feed…</p>
+  <!-- ═══ FOOTER (Fixed Bottom) ═══ -->
+  <footer class="relative z-10 glass border-t border-black/5 px-6 py-3 flex-shrink-0">
+    <div
+      class="max-w-5xl mx-auto flex items-center justify-between text-[0.65rem] font-medium text-black/40 uppercase tracking-widest">
+      <a href="index.html" class="hover:text-black transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Back
+        to Home</a>
+      <span id="lastUpdate" class="flex items-center gap-1"><i class="fa-solid fa-signal"></i> Connecting…</span>
     </div>
-  </div>
-</main>
+  </footer>
 
-<!-- ═══ FOOTER ═══ -->
-<footer class="relative z-10 glass border-t border-black/5 px-6 py-4 mt-auto">
-  <div class="max-w-5xl mx-auto flex items-center justify-between text-[0.65rem] font-medium text-black/40 uppercase tracking-widest">
-    <a href="index.html" class="hover:text-black transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Home</a>
-    <span id="lastUpdate" class="flex items-center gap-1"><i class="fa-solid fa-signal"></i> Connecting…</span>
-  </div>
-</footer>
+  <script>
+    /* ══════════════════════════════════════════
+       mediCrisis — Live Exhibition Dashboard
+       ══════════════════════════════════════════ */
 
-<script>
-/* ══════════════════════════════════════════
-   mediCrisis — Live Exhibition Dashboard
-   ══════════════════════════════════════════ */
+    const API_URL = '../api.php';
+    const POLL_INTERVAL = 5000;
 
-const API_URL = '../api.php';
-const POLL_INTERVAL = 5000;
+    let knownPlayerKeys = new Set();
 
-let knownPlayerKeys = new Set();
+    // VR Cursor Physics
+    const vrCursor = document.getElementById('vr-cursor');
+    let cx = 0, cy = 0;
+    addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+    gsap.ticker.add(() => { gsap.set(vrCursor, { x: cx, y: cy }); });
 
-// VR Cursor Physics
-const vrCursor = document.getElementById('vr-cursor');
-let cx = 0, cy = 0;
-addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
-gsap.ticker.add(() => { gsap.set(vrCursor, { x: cx, y: cy }); });
+    function attachHover() {
+      document.querySelectorAll('a, button, .player-row').forEach(el => {
+        el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
+        el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
+      });
+    }
 
-function attachHover() {
-  document.querySelectorAll('a, button, .player-row').forEach(el => {
-    el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
-  });
-}
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60), s = sec % 60;
+      return `${m}m ${String(s).padStart(2, '0')}s`;
+    }
 
-function formatTime(sec) {
-  const m = Math.floor(sec / 60), s = sec % 60;
-  return `${m}m ${String(s).padStart(2,'0')}s`;
-}
+    function statusBadge(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
+      if (s === 'stopped') return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
+      return `<span class="status-badge status-left"><i class="fa-solid fa-minus mr-1"></i>Abandoned</span>`;
+    }
 
-function statusBadge(status) {
-  const s = (status || '').toLowerCase();
-  if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
-  if (s === 'stopped')   return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
-  return `<span class="status-badge status-left"><i class="fa-solid fa-minus mr-1"></i>Abandoned</span>`;
-}
+    function rankClass(i) {
+      if (i === 0) return 'rank-1';
+      if (i === 1) return 'rank-2';
+      if (i === 2) return 'rank-3';
+      return 'rank-default';
+    }
 
-function rankClass(i) {
-  if (i === 0) return 'rank-1';
-  if (i === 1) return 'rank-2';
-  if (i === 2) return 'rank-3';
-  return 'rank-default';
-}
+    function rankIcon(i) {
+      if (i === 0) return '<i class="fa-solid fa-crown text-xs"></i>';
+      return i + 1;
+    }
 
-function rankIcon(i) {
-  if (i === 0) return '<i class="fa-solid fa-crown text-xs"></i>';
-  return i + 1;
-}
+    function playerKey(p) { return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`; }
 
-function playerKey(p) { return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`; }
+    function sortData(data) {
+      return [...data].sort((a, b) => {
+        const diff = (b.integrity_score || 0) - (a.integrity_score || 0);
+        return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0);
+      });
+    }
 
-function sortData(data) {
-  return [...data].sort((a, b) => {
-    const diff = (b.integrity_score || 0) - (a.integrity_score || 0);
-    return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0);
-  });
-}
+    function scoreColor(score) {
+      if (score >= 80) return '#000';
+      if (score >= 50) return '#666';
+      return '#ff3b5c';
+    }
 
-function scoreColor(score) {
-  if (score >= 80) return '#000';
-  if (score >= 50) return '#666';
-  return '#ff3b5c';
-}
-
-function scoreRingSVG(score) {
-  const r = 22, c = 2 * Math.PI * r, offset = c - (score / 100) * c;
-  const col = scoreColor(score);
-  return `<svg width="52" height="52" viewBox="0 0 52 52">
-    <circle cx="26" cy="26" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="3"/>
-    <circle cx="26" cy="26" r="${r}" fill="none" stroke="${col}" stroke-width="3"
+    function scoreRingSVG(score) {
+      const r = 17, c = 2 * Math.PI * r, offset = c - (score / 100) * c;
+      const col = scoreColor(score);
+      return `<svg width="40" height="40" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2.5"/>
+    <circle cx="20" cy="20" r="${r}" fill="none" stroke="${col}" stroke-width="2.5"
       stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
   </svg>`;
-}
+    }
 
-function buildRow(player, index, isNew) {
-  const score = player.integrity_score || 0;
-  return `
-  <div class="player-row rounded-2xl px-5 py-3 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
+    function buildRow(player, index, isNew) {
+      const score = player.integrity_score || 0;
+      return `
+  <div class="player-row rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
     <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
     <div class="flex-1 min-w-0 ml-1">
       <p class="font-bold text-sm text-black truncate">${player.player_name}</p>
@@ -243,89 +477,91 @@ function buildRow(player, index, isNew) {
     </div>
     <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`;
-}
+    }
 
-function updateStats(data) {
-  if (!data.length) return;
-  const scores = data.map(d => d.integrity_score || 0);
-  const top = Math.max(...scores);
-  const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-  const completed = data.filter(d => (d.surgery_status || '').toLowerCase() === 'completed').length;
-  const rate = Math.round((completed / data.length) * 100);
+    function updateStats(data) {
+      if (!data.length) return;
+      const scores = data.map(d => parseInt(d.integrity_score) || 0);
+      const top = Math.max(...scores);
+      const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      const completed = data.filter(d => (d.surgery_status || '').toLowerCase() === 'completed').length;
+      const rate = Math.round((completed / data.length) * 100);
 
-  gsap.to('#topScore', { textContent: top, duration: 0.6, snap: { textContent: 1 },
-    onUpdate() { document.getElementById('topScore').textContent = Math.round(gsap.getProperty('#topScore', 'textContent')) + '%'; }});
-  document.getElementById('avgScore').textContent = avg + '%';
-  document.getElementById('successRate').textContent = rate + '%';
-  document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
-}
+      gsap.to('#topScore', {
+        textContent: top, duration: 0.6, snap: { textContent: 1 },
+        onUpdate() { document.getElementById('topScore').textContent = Math.round(gsap.getProperty('#topScore', 'textContent')) + '%'; }
+      });
+      document.getElementById('avgScore').textContent = avg + '%';
+      document.getElementById('successRate').textContent = rate + '%';
+      document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
+    }
 
-function renderLeaderboard(data, isInitial) {
-  const board = document.getElementById('leaderboard');
-  const sorted = sortData(data);
+    function renderLeaderboard(data, isInitial) {
+      const board = document.getElementById('leaderboard');
+      const sorted = sortData(data);
 
-  const newKeys = new Set(sorted.map(playerKey));
-  const freshKeys = new Set();
-  newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
-  knownPlayerKeys = newKeys;
+      const newKeys = new Set(sorted.map(playerKey));
+      const freshKeys = new Set();
+      newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
+      knownPlayerKeys = newKeys;
 
-  board.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
+      board.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
 
-  const rows = board.querySelectorAll('.player-row');
-  if (isInitial) {
-    gsap.from(rows, { y: 40, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
-  } else if (freshKeys.size > 0) {
-    rows.forEach(row => {
-      if (freshKeys.has(row.dataset.key)) {
-        gsap.from(row, { x: -60, opacity: 0, duration: 0.6, ease: 'back.out(1.4)', clearProps: 'all' });
+      const rows = board.querySelectorAll('.player-row');
+      if (isInitial) {
+        gsap.from(rows, { y: 40, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
+      } else if (freshKeys.size > 0) {
+        rows.forEach(row => {
+          if (freshKeys.has(row.dataset.key)) {
+            gsap.from(row, { x: -60, opacity: 0, duration: 0.6, ease: 'back.out(1.4)', clearProps: 'all' });
+          }
+        });
       }
-    });
-  }
-  
-  attachHover();
-  updateStats(sorted);
-  document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-check text-black"></i> Live sync active`;
-}
 
-function introAnimation() {
-  gsap.timeline()
-    .from('#navbar', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' })
-    .from('#statsBar > div', { y: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, '-=0.2')
-    .from('footer', { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
-  attachHover();
-}
+      attachHover();
+      updateStats(sorted);
+      document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-check text-black"></i> Live sync active`;
+    }
 
-async function fetchData(isInitial = false) {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const arr = Array.isArray(data) ? data : (data.data || []);
-    if (arr.length) {
-      renderLeaderboard(arr, isInitial);
-    } else if (isInitial) {
-      document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
-        `<div class="glass rounded-2xl p-12 text-center">
+    function introAnimation() {
+      gsap.timeline()
+        .from('#navbar', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' })
+        .from('#statsBar > div', { y: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, '-=0.2')
+        .from('footer', { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
+      attachHover();
+    }
+
+    async function fetchData(isInitial = false) {
+      try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const arr = Array.isArray(data) ? data : (data.data || []);
+        if (arr.length) {
+          renderLeaderboard(arr, isInitial);
+        } else if (isInitial) {
+          document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
+            `<div class="glass rounded-2xl p-12 text-center">
           <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4 block"></i>
           <p class="text-black/50 text-sm font-medium">No surgeons yet — waiting for first entry…</p></div>`);
+        }
+      } catch (err) {
+        document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`;
+      }
     }
-  } catch (err) {
-    document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`;
-  }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-  introAnimation();
-  fetchData(true);
-  setInterval(() => fetchData(false), POLL_INTERVAL);
-});
-</script>
+    document.addEventListener('DOMContentLoaded', () => {
+      introAnimation();
+      fetchData(true);
+      setInterval(() => fetchData(false), POLL_INTERVAL);
+    });
+  </script>
 
-<script type="module">
-import * as THREE from 'three';
+  <script type="module">
+    import * as THREE from 'three';
 
-const gridVS = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
-const gridFS = `
+    const gridVS = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
+    const gridFS = `
 uniform float uTime; uniform vec2 uMouse,uResolution; varying vec2 vUv;
 void main(){
   float a=uResolution.x/uResolution.y, gs=35.0;
@@ -341,50 +577,52 @@ void main(){
   vec2 fc=abs(cl-.5);
   float o=step(fc.x,hs)*step(fc.y,hs)-step(fc.x,hs-bw)*step(fc.y,hs-bw);
   vec3 bg=vec3(1.);
-  vec3 ln=vec3(0.);
+  vec3 ln=vec3(0.82);
   float la=0.5+push*.5;
+  ln=mix(vec3(0.82),vec3(0.55),push);
   gl_FragColor=vec4(mix(bg,ln,o*la),1.);
 }`;
 
-const canvas = document.getElementById('grid-canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
+    const canvas = document.getElementById('grid-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
 
-const scene = new THREE.Scene();
-const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-const mouse = new THREE.Vector2(0, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    const mouse = new THREE.Vector2(0, 0);
 
-const mat = new THREE.ShaderMaterial({
-  vertexShader: gridVS, fragmentShader: gridFS,
-  uniforms: {
-    uTime: { value: 0 }, uMouse: { value: new THREE.Vector2() },
-    uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) }
-  },
-  depthWrite: false, depthTest: false
-});
-const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
-mesh.frustumCulled = false;
-scene.add(mesh);
+    const mat = new THREE.ShaderMaterial({
+      vertexShader: gridVS, fragmentShader: gridFS,
+      uniforms: {
+        uTime: { value: 0 }, uMouse: { value: new THREE.Vector2() },
+        uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) }
+      },
+      depthWrite: false, depthTest: false
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+    mesh.frustumCulled = false;
+    scene.add(mesh);
 
-const clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
-addEventListener('mousemove', e => {
-  mouse.x = (e.clientX / innerWidth) * 2 - 1;
-  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
-});
+    addEventListener('mousemove', e => {
+      mouse.x = (e.clientX / innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+    });
 
-addEventListener('resize', () => {
-  renderer.setSize(innerWidth, innerHeight);
-  mat.uniforms.uResolution.value.set(innerWidth, innerHeight);
-});
+    addEventListener('resize', () => {
+      renderer.setSize(innerWidth, innerHeight);
+      mat.uniforms.uResolution.value.set(innerWidth, innerHeight);
+    });
 
-(function animate() {
-  requestAnimationFrame(animate);
-  mat.uniforms.uTime.value = clock.getElapsedTime();
-  mat.uniforms.uMouse.value.copy(mouse);
-  renderer.render(scene, camera);
-})();
-</script>
+    (function animate() {
+      requestAnimationFrame(animate);
+      mat.uniforms.uTime.value = clock.getElapsedTime();
+      mat.uniforms.uMouse.value.copy(mouse);
+      renderer.render(scene, camera);
+    })();
+  </script>
 </body>
+
 </html>
