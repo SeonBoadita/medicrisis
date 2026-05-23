@@ -3,108 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VitalRush — Live Exhibition Dashboard</title>
-<meta name="description" content="VitalRush VR Medical Simulation Live Leaderboard — Ignite 26">
+<title>mediCrisis — Live Leaderboard</title>
+<meta name="description" content="mediCrisis VR Medical Simulation Live Leaderboard — Ignite 26">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
 <script>
 tailwind.config = {
   theme: {
     extend: {
-      fontFamily: { doto: ['Doto'], inter: ['Inter'] },
-      colors: {
-        vr: { dark: '#0a0e17', panel: '#111827', cyan: '#00e5ff', blue: '#0077ff', red: '#ff3b5c', green: '#00ffa3', gray: '#6b7280', glow: 'rgba(0,229,255,0.15)' }
-      }
+      fontFamily: { doto: ['Doto'], inter: ['Inter'] }
     }
   }
 }
 </script>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #0a0e17; color: #e2e8f0; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
-.glass { background: rgba(17,24,39,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,229,255,0.08); }
-.glow-border { box-shadow: 0 0 20px rgba(0,229,255,0.05), inset 0 0 20px rgba(0,229,255,0.02); }
-.pulse-dot { width: 10px; height: 10px; background: #00ffa3; border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,255,163,0.6); } 50% { box-shadow: 0 0 0 10px rgba(0,255,163,0); } }
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+/* Custom VR Surgical Reticle Cursor (Copied from index) */
+#vr-cursor { position: fixed; top: 0; left: 0; width: 32px; height: 32px; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); mix-blend-mode: difference; transition: width 0.3s, height 0.3s; }
+#vr-cursor .crosshair-x { position: absolute; top: 50%; left: -10px; right: -10px; height: 1px; background: rgba(255,255,255,0.8); transform: translateY(-50%); transition: all 0.3s; }
+#vr-cursor .crosshair-y { position: absolute; left: 50%; top: -10px; bottom: -10px; width: 1px; background: rgba(255,255,255,0.8); transform: translateX(-50%); transition: all 0.3s; }
+#vr-cursor .brackets { position: absolute; inset: 0; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; clip-path: polygon(0 0, 20% 0, 20% 100%, 0 100%, 0 0, 100% 0, 100% 100%, 80% 100%, 80% 0, 100% 0); transition: all 0.3s; }
+#vr-cursor.hover { width: 48px; height: 48px; }
+#vr-cursor.hover .crosshair-x { left: 10px; right: 10px; background: rgba(255,255,255,1); }
+#vr-cursor.hover .crosshair-y { top: 10px; bottom: 10px; background: rgba(255,255,255,1); }
+#vr-cursor.hover .brackets { border-color: rgba(255,255,255,1); animation: spin 4s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Light Theme Grid */
+.bg-grid { position: fixed; inset: 0; z-index: 0; opacity: 0.05; background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 15s linear infinite; }
 @keyframes gridMove { 0% { transform: translateY(0); } 100% { transform: translateY(40px); } }
-.bg-grid { position: fixed; inset: 0; z-index: 0; opacity: 0.03;
-  background-image: linear-gradient(rgba(0,229,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.3) 1px, transparent 1px);
-  background-size: 40px 40px; animation: gridMove 8s linear infinite; }
+
+/* Light Theme Glass */
+.glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.06); }
+
+/* Floating Glassmorphism Navbar (Matching index) */
+.navbar { position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%); z-index: 100; width: 95%; max-width: 1400px; padding: 1rem 2.5rem; border-radius: 100px; background: rgba(255, 255, 255, 0.001); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px); border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+::selection { background: #000; color: #fff; }
+.player-row { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.06); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease; }
+.player-row:hover { transform: scale(1.01) translateX(4px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); }
+
 .rank-badge { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
-.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0a0e17; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
-.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0e17; }
-.rank-3 { background: linear-gradient(135deg, #cd7f32, #b8860b); color: #0a0e17; }
-.rank-default { background: rgba(0,229,255,0.1); color: #00e5ff; border: 1px solid rgba(0,229,255,0.15); }
-.player-row { transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease; }
-.player-row:hover { transform: scale(1.015) translateX(4px); box-shadow: 0 0 30px rgba(0,229,255,0.12), 0 8px 32px rgba(0,0,0,0.4); border-color: rgba(0,229,255,0.25) !important; }
-.status-badge { padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-.status-completed { background: rgba(0,255,163,0.12); color: #00ffa3; border: 1px solid rgba(0,255,163,0.25); }
-.status-stopped { background: rgba(255,59,92,0.12); color: #ff3b5c; border: 1px solid rgba(255,59,92,0.25); }
-.status-left { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.25); }
+.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #fff; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
+.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #fff; }
+.rank-3 { background: linear-gradient(135deg, #cd7f32, #b8860b); color: #fff; }
+.rank-default { background: rgba(0,0,0,0.05); color: #000; border: 1px solid rgba(0,0,0,0.1); }
+
+.status-badge { padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-completed { background: rgba(0,0,0,0.05); color: #000; border: 1px solid rgba(0,0,0,0.1); }
+.status-stopped { background: rgba(255,59,92,0.1); color: #ff3b5c; border: 1px solid rgba(255,59,92,0.2); }
+.status-left { background: rgba(107,114,128,0.1); color: #6b7280; border: 1px solid rgba(107,114,128,0.2); }
+
 .score-ring { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
 .score-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.header-glow { position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, transparent 70%); pointer-events: none; }
 .stat-value { font-family: 'Doto', monospace; }
-.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,229,255,0.2) transparent; }
+
+.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.1) transparent; }
 .scroll-container::-webkit-scrollbar { width: 4px; }
-.scroll-container::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 4px; }
+.scroll-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+
 .new-entry { animation: newGlow 1.5s ease-out; }
-@keyframes newGlow { 0% { box-shadow: 0 0 40px rgba(0,229,255,0.4); } 100% { box-shadow: none; } }
+@keyframes newGlow { 0% { box-shadow: 0 0 40px rgba(0,0,0,0.1); border-color: #000; } 100% { box-shadow: none; } }
+.pulse-dot { width: 8px; height: 8px; background: #000; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,0,0,0.2); } 50% { box-shadow: 0 0 0 8px rgba(0,0,0,0); } }
 </style>
 </head>
 <body class="flex flex-col min-h-screen">
 <div class="bg-grid"></div>
 
-<!-- ═══ HEADER ═══ -->
-<header id="header" class="relative z-10 glass border-b border-cyan-900/20 px-6 py-4">
-  <div class="header-glow"></div>
-  <div class="max-w-6xl mx-auto flex items-center justify-between relative">
-    <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-        <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
-      </div>
-      <div>
-        <h1 class="font-doto text-2xl font-bold tracking-wider bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">VITALRUSH</h1>
-        <p class="text-[0.65rem] text-slate-500 tracking-widest uppercase">VR Surgery Simulation • Ignite 26</p>
-      </div>
+<!-- Custom VR Cursor -->
+<div id="vr-cursor">
+  <div class="crosshair-x"></div>
+  <div class="crosshair-y"></div>
+  <div class="brackets"></div>
+</div>
+
+<!-- ═══ NAVBAR (Matching index.html) ═══ -->
+<nav class="navbar flex items-center justify-between" id="navbar">
+  <div class="flex items-center gap-4">
+    <a href="index.html" class="flex items-center gap-3 group">
+      <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform" style="filter: brightness(0);">
+      <span class="font-doto text-3xl font-bold tracking-wider text-black">medi<span class="font-black">Crisis</span></span>
+    </a>
+  </div>
+  <div class="hidden md:flex items-center gap-8 text-sm text-black/50 font-medium">
+    <a href="index.html" class="hover:text-black transition-colors">Home</a>
+    <a href="index.html#features" class="hover:text-black transition-colors">Features</a>
+    <a href="leaderboard.html" class="text-black font-semibold">Leaderboard</a>
+    <a href="index.html#cta" class="hover:text-black transition-colors">Play</a>
+  </div>
+  <div class="flex items-center gap-4">
+    <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
+      <i class="fa-solid fa-users text-black/40"></i>
+      <span class="stat-value font-bold text-black">0</span> Surgeons
     </div>
-    <div class="flex items-center gap-6">
-      <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-slate-400">
-        <i class="fa-solid fa-users text-cyan-500"></i>
-        <span class="stat-value">0</span> Surgeons
-      </div>
-      <div class="flex items-center gap-2 glass rounded-full px-4 py-2">
-        <div class="pulse-dot"></div>
-        <span class="text-xs font-medium text-green-400 tracking-wide">LIVE SYSTEM ACTIVE</span>
-      </div>
+    <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
+      <div class="pulse-dot"></div>
+      <span class="text-xs font-bold text-black tracking-wide">LIVE</span>
     </div>
   </div>
-</header>
+</nav>
 
 <!-- ═══ MAIN ═══ -->
-<main class="relative z-10 flex-1 px-4 py-6 max-w-5xl mx-auto w-full">
+<main class="relative z-10 flex-1 px-4 pt-28 pb-6 max-w-5xl mx-auto w-full">
   <!-- Stats Bar -->
   <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
-    <div class="glass glow-border rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-trophy text-amber-400 mr-1"></i>Top Score</p>
-      <p id="topScore" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    <div class="glass rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-trophy text-black/30 mr-1"></i>Top Score</p>
+      <p id="topScore" class="stat-value text-2xl font-black text-black">—</p>
     </div>
-    <div class="glass glow-border rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-bolt text-cyan-400 mr-1"></i>Avg Integrity</p>
-      <p id="avgScore" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    <div class="glass rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-bolt text-black/30 mr-1"></i>Avg Integrity</p>
+      <p id="avgScore" class="stat-value text-2xl font-black text-black">—</p>
     </div>
-    <div class="glass glow-border rounded-2xl p-4 text-center">
-      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-check-double text-green-400 mr-1"></i>Success Rate</p>
-      <p id="successRate" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    <div class="glass rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i class="fa-solid fa-check-double text-black/30 mr-1"></i>Success Rate</p>
+      <p id="successRate" class="stat-value text-2xl font-black text-black">—</p>
     </div>
   </div>
 
   <!-- Column Headers -->
-  <div class="flex items-center px-5 py-2 mb-2 text-[0.65rem] text-slate-500 uppercase tracking-widest font-semibold">
+  <div class="flex items-center px-5 py-2 mb-2 text-[0.65rem] text-black/40 uppercase tracking-widest font-bold">
     <span class="w-14">Rank</span>
     <span class="flex-1 ml-2">Surgeon</span>
     <span class="w-20 text-center hidden sm:block">Integrity</span>
@@ -114,35 +139,44 @@ body { background: #0a0e17; color: #e2e8f0; font-family: 'Inter', sans-serif; mi
 
   <!-- Leaderboard -->
   <div id="leaderboard" class="scroll-container flex flex-col gap-2">
-    <div id="emptyState" class="glass glow-border rounded-2xl p-12 text-center">
-      <i class="fa-solid fa-satellite-dish text-4xl text-cyan-500/30 mb-4"></i>
-      <p class="text-slate-500 text-sm">Awaiting surgeon data feed…</p>
+    <div id="emptyState" class="glass rounded-2xl p-12 text-center">
+      <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4"></i>
+      <p class="text-black/50 text-sm font-medium">Awaiting surgeon data feed…</p>
     </div>
   </div>
 </main>
 
 <!-- ═══ FOOTER ═══ -->
-<footer class="relative z-10 glass border-t border-cyan-900/20 px-6 py-3">
-  <div class="max-w-5xl mx-auto flex items-center justify-between text-[0.6rem] text-slate-600">
-    <span class="font-doto tracking-wider">VITALRUSH v2.0</span>
+<footer class="relative z-10 glass border-t border-black/5 px-6 py-4 mt-auto">
+  <div class="max-w-5xl mx-auto flex items-center justify-between text-[0.65rem] font-medium text-black/40 uppercase tracking-widest">
+    <a href="index.html" class="hover:text-black transition-colors"><i class="fa-solid fa-arrow-left mr-1"></i> Back to Home</a>
     <span id="lastUpdate" class="flex items-center gap-1"><i class="fa-solid fa-signal"></i> Connecting…</span>
-    <span>Ignite 26 Exhibition</span>
   </div>
 </footer>
 
 <script>
 /* ══════════════════════════════════════════
-   VITALRUSH — Live Exhibition Dashboard
-   Polls API every 5s, sorts, renders with GSAP
+   mediCrisis — Live Exhibition Dashboard
    ══════════════════════════════════════════ */
 
-const API_URL = 'http://localhost/medicrisis/api.php';
-const POLL_INTERVAL = 5000; // ms — adjust for exhibition needs
+const API_URL = '../api.php';
+const POLL_INTERVAL = 5000;
 
-let previousData = []; // track previous state for diffing
-let knownPlayerKeys = new Set(); // track known entries for "new" detection
+let knownPlayerKeys = new Set();
 
-// ── Helpers ──
+// VR Cursor Physics
+const vrCursor = document.getElementById('vr-cursor');
+let cx = 0, cy = 0;
+addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+gsap.ticker.add(() => { gsap.set(vrCursor, { x: cx, y: cy }); });
+
+function attachHover() {
+  document.querySelectorAll('a, button, .player-row').forEach(el => {
+    el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
+  });
+}
+
 function formatTime(sec) {
   const m = Math.floor(sec / 60), s = sec % 60;
   return `${m}m ${String(s).padStart(2,'0')}s`;
@@ -150,9 +184,9 @@ function formatTime(sec) {
 
 function statusBadge(status) {
   const s = (status || '').toLowerCase();
-  if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-circle-check mr-1"></i>Success</span>`;
-  if (s === 'stopped')   return `<span class="status-badge status-stopped"><i class="fa-solid fa-skull-crossbones mr-1"></i>Flatline</span>`;
-  return `<span class="status-badge status-left"><i class="fa-solid fa-person-walking-arrow-right mr-1"></i>Abandoned</span>`;
+  if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
+  if (s === 'stopped')   return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
+  return `<span class="status-badge status-left"><i class="fa-solid fa-minus mr-1"></i>Abandoned</span>`;
 }
 
 function rankClass(i) {
@@ -177,8 +211,8 @@ function sortData(data) {
 }
 
 function scoreColor(score) {
-  if (score >= 80) return '#00ffa3';
-  if (score >= 50) return '#fbbf24';
+  if (score >= 80) return '#000';
+  if (score >= 50) return '#666';
   return '#ff3b5c';
 }
 
@@ -186,35 +220,32 @@ function scoreRingSVG(score) {
   const r = 22, c = 2 * Math.PI * r, offset = c - (score / 100) * c;
   const col = scoreColor(score);
   return `<svg width="52" height="52" viewBox="0 0 52 52">
-    <circle cx="26" cy="26" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+    <circle cx="26" cy="26" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="3"/>
     <circle cx="26" cy="26" r="${r}" fill="none" stroke="${col}" stroke-width="3"
       stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
   </svg>`;
 }
 
-// ── Build Row HTML ──
 function buildRow(player, index, isNew) {
   const score = player.integrity_score || 0;
   return `
-  <div class="player-row glass glow-border rounded-2xl px-5 py-3 flex items-center gap-3 cursor-default ${isNew ? 'new-entry' : ''}"
-       data-key="${playerKey(player)}">
+  <div class="player-row rounded-2xl px-5 py-3 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
     <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
     <div class="flex-1 min-w-0 ml-1">
-      <p class="font-semibold text-sm text-slate-100 truncate">${player.player_name}</p>
-      <p class="text-[0.65rem] text-slate-500 sm:hidden">${score}% • ${formatTime(player.duration_seconds)}</p>
+      <p class="font-bold text-sm text-black truncate">${player.player_name}</p>
+      <p class="text-[0.65rem] font-bold text-black/40 sm:hidden">${score}% • ${formatTime(player.duration_seconds)}</p>
     </div>
     <div class="score-ring hidden sm:flex">
       ${scoreRingSVG(score)}
-      <span class="text-xs font-bold stat-value" style="color:${scoreColor(score)}">${score}</span>
+      <span class="text-xs font-black stat-value" style="color:${scoreColor(score)}">${score}</span>
     </div>
     <div class="w-24 text-center hidden sm:block">
-      <span class="stat-value text-sm text-slate-300">${formatTime(player.duration_seconds)}</span>
+      <span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span>
     </div>
     <div class="w-28 text-center">${statusBadge(player.surgery_status)}</div>
   </div>`;
 }
 
-// ── Update Stats Bar ──
 function updateStats(data) {
   if (!data.length) return;
   const scores = data.map(d => d.integrity_score || 0);
@@ -230,22 +261,17 @@ function updateStats(data) {
   document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
 }
 
-// ── Render Leaderboard ──
 function renderLeaderboard(data, isInitial) {
   const board = document.getElementById('leaderboard');
   const sorted = sortData(data);
 
-  // Detect new entries
   const newKeys = new Set(sorted.map(playerKey));
   const freshKeys = new Set();
   newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
   knownPlayerKeys = newKeys;
 
-  // Build HTML
-  const html = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
-  board.innerHTML = html;
+  board.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
 
-  // GSAP Animations
   const rows = board.querySelectorAll('.player-row');
   if (isInitial) {
     gsap.from(rows, { y: 40, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
@@ -256,45 +282,39 @@ function renderLeaderboard(data, isInitial) {
       }
     });
   }
-
+  
+  attachHover();
   updateStats(sorted);
-  document.getElementById('lastUpdate').innerHTML =
-    `<i class="fa-solid fa-signal text-green-500"></i> Updated ${new Date().toLocaleTimeString()}`;
+  document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-check text-black"></i> Live sync active`;
 }
 
-// ── Initial GSAP entrance ──
 function introAnimation() {
-  const tl = gsap.timeline();
-  tl.from('#header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' })
+  gsap.timeline()
+    .from('#navbar', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' })
     .from('#statsBar > div', { y: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, '-=0.2')
     .from('footer', { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
+  attachHover();
 }
 
-// ── Fetch & Poll ──
 async function fetchData(isInitial = false) {
   try {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    // Handle both {status,data} wrapper and raw array
     const arr = Array.isArray(data) ? data : (data.data || []);
     if (arr.length) {
       renderLeaderboard(arr, isInitial);
-      previousData = arr;
     } else if (isInitial) {
       document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
-        `<div class="glass glow-border rounded-2xl p-12 text-center">
-          <i class="fa-solid fa-satellite-dish text-4xl text-cyan-500/30 mb-4 block"></i>
-          <p class="text-slate-500 text-sm">No surgeons yet — waiting for first entry…</p></div>`);
+        `<div class="glass rounded-2xl p-12 text-center">
+          <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4 block"></i>
+          <p class="text-black/50 text-sm font-medium">No surgeons yet — waiting for first entry…</p></div>`);
     }
   } catch (err) {
-    console.warn('VitalRush fetch error:', err);
-    document.getElementById('lastUpdate').innerHTML =
-      `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Reconnecting…`;
+    document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`;
   }
 }
 
-// ── Boot ──
 document.addEventListener('DOMContentLoaded', () => {
   introAnimation();
   fetchData(true);
