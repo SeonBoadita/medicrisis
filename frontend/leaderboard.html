@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalRush — Live Exhibition Dashboard</title>
+<meta name="description" content="VitalRush VR Medical Simulation Live Leaderboard — Ignite 26">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { doto: ['Doto'], inter: ['Inter'] },
+      colors: {
+        vr: { dark: '#0a0e17', panel: '#111827', cyan: '#00e5ff', blue: '#0077ff', red: '#ff3b5c', green: '#00ffa3', gray: '#6b7280', glow: 'rgba(0,229,255,0.15)' }
+      }
+    }
+  }
+}
+</script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e17; color: #e2e8f0; font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; }
+.glass { background: rgba(17,24,39,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0,229,255,0.08); }
+.glow-border { box-shadow: 0 0 20px rgba(0,229,255,0.05), inset 0 0 20px rgba(0,229,255,0.02); }
+.pulse-dot { width: 10px; height: 10px; background: #00ffa3; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,255,163,0.6); } 50% { box-shadow: 0 0 0 10px rgba(0,255,163,0); } }
+@keyframes gridMove { 0% { transform: translateY(0); } 100% { transform: translateY(40px); } }
+.bg-grid { position: fixed; inset: 0; z-index: 0; opacity: 0.03;
+  background-image: linear-gradient(rgba(0,229,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.3) 1px, transparent 1px);
+  background-size: 40px 40px; animation: gridMove 8s linear infinite; }
+.rank-badge { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+.rank-1 { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0a0e17; box-shadow: 0 0 20px rgba(251,191,36,0.3); }
+.rank-2 { background: linear-gradient(135deg, #94a3b8, #cbd5e1); color: #0a0e17; }
+.rank-3 { background: linear-gradient(135deg, #cd7f32, #b8860b); color: #0a0e17; }
+.rank-default { background: rgba(0,229,255,0.1); color: #00e5ff; border: 1px solid rgba(0,229,255,0.15); }
+.player-row { transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease; }
+.player-row:hover { transform: scale(1.015) translateX(4px); box-shadow: 0 0 30px rgba(0,229,255,0.12), 0 8px 32px rgba(0,0,0,0.4); border-color: rgba(0,229,255,0.25) !important; }
+.status-badge { padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-completed { background: rgba(0,255,163,0.12); color: #00ffa3; border: 1px solid rgba(0,255,163,0.25); }
+.status-stopped { background: rgba(255,59,92,0.12); color: #ff3b5c; border: 1px solid rgba(255,59,92,0.25); }
+.status-left { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.25); }
+.score-ring { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; }
+.score-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+.header-glow { position: absolute; top: -60%; left: 50%; transform: translateX(-50%); width: 600px; height: 200px; background: radial-gradient(ellipse, rgba(0,229,255,0.08) 0%, transparent 70%); pointer-events: none; }
+.stat-value { font-family: 'Doto', monospace; }
+.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,229,255,0.2) transparent; }
+.scroll-container::-webkit-scrollbar { width: 4px; }
+.scroll-container::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 4px; }
+.new-entry { animation: newGlow 1.5s ease-out; }
+@keyframes newGlow { 0% { box-shadow: 0 0 40px rgba(0,229,255,0.4); } 100% { box-shadow: none; } }
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+<div class="bg-grid"></div>
+
+<!-- ═══ HEADER ═══ -->
+<header id="header" class="relative z-10 glass border-b border-cyan-900/20 px-6 py-4">
+  <div class="header-glow"></div>
+  <div class="max-w-6xl mx-auto flex items-center justify-between relative">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <i class="fa-solid fa-heart-pulse text-white text-lg"></i>
+      </div>
+      <div>
+        <h1 class="font-doto text-2xl font-bold tracking-wider bg-gradient-to-r from-cyan-300 to-blue-400 bg-clip-text text-transparent">VITALRUSH</h1>
+        <p class="text-[0.65rem] text-slate-500 tracking-widest uppercase">VR Surgery Simulation • Ignite 26</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-6">
+      <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+        <i class="fa-solid fa-users text-cyan-500"></i>
+        <span class="stat-value">0</span> Surgeons
+      </div>
+      <div class="flex items-center gap-2 glass rounded-full px-4 py-2">
+        <div class="pulse-dot"></div>
+        <span class="text-xs font-medium text-green-400 tracking-wide">LIVE SYSTEM ACTIVE</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ MAIN ═══ -->
+<main class="relative z-10 flex-1 px-4 py-6 max-w-5xl mx-auto w-full">
+  <!-- Stats Bar -->
+  <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
+    <div class="glass glow-border rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-trophy text-amber-400 mr-1"></i>Top Score</p>
+      <p id="topScore" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    </div>
+    <div class="glass glow-border rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-bolt text-cyan-400 mr-1"></i>Avg Integrity</p>
+      <p id="avgScore" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    </div>
+    <div class="glass glow-border rounded-2xl p-4 text-center">
+      <p class="text-[0.65rem] text-slate-500 uppercase tracking-widest mb-1"><i class="fa-solid fa-check-double text-green-400 mr-1"></i>Success Rate</p>
+      <p id="successRate" class="stat-value text-2xl font-bold text-cyan-300">—</p>
+    </div>
+  </div>
+
+  <!-- Column Headers -->
+  <div class="flex items-center px-5 py-2 mb-2 text-[0.65rem] text-slate-500 uppercase tracking-widest font-semibold">
+    <span class="w-14">Rank</span>
+    <span class="flex-1 ml-2">Surgeon</span>
+    <span class="w-20 text-center hidden sm:block">Integrity</span>
+    <span class="w-24 text-center hidden sm:block">Duration</span>
+    <span class="w-28 text-center">Status</span>
+  </div>
+
+  <!-- Leaderboard -->
+  <div id="leaderboard" class="scroll-container flex flex-col gap-2">
+    <div id="emptyState" class="glass glow-border rounded-2xl p-12 text-center">
+      <i class="fa-solid fa-satellite-dish text-4xl text-cyan-500/30 mb-4"></i>
+      <p class="text-slate-500 text-sm">Awaiting surgeon data feed…</p>
+    </div>
+  </div>
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="relative z-10 glass border-t border-cyan-900/20 px-6 py-3">
+  <div class="max-w-5xl mx-auto flex items-center justify-between text-[0.6rem] text-slate-600">
+    <span class="font-doto tracking-wider">VITALRUSH v2.0</span>
+    <span id="lastUpdate" class="flex items-center gap-1"><i class="fa-solid fa-signal"></i> Connecting…</span>
+    <span>Ignite 26 Exhibition</span>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════
+   VITALRUSH — Live Exhibition Dashboard
+   Polls API every 5s, sorts, renders with GSAP
+   ══════════════════════════════════════════ */
+
+const API_URL = 'http://localhost/medicrisis/api.php';
+const POLL_INTERVAL = 5000; // ms — adjust for exhibition needs
+
+let previousData = []; // track previous state for diffing
+let knownPlayerKeys = new Set(); // track known entries for "new" detection
+
+// ── Helpers ──
+function formatTime(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}m ${String(s).padStart(2,'0')}s`;
+}
+
+function statusBadge(status) {
+  const s = (status || '').toLowerCase();
+  if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-circle-check mr-1"></i>Success</span>`;
+  if (s === 'stopped')   return `<span class="status-badge status-stopped"><i class="fa-solid fa-skull-crossbones mr-1"></i>Flatline</span>`;
+  return `<span class="status-badge status-left"><i class="fa-solid fa-person-walking-arrow-right mr-1"></i>Abandoned</span>`;
+}
+
+function rankClass(i) {
+  if (i === 0) return 'rank-1';
+  if (i === 1) return 'rank-2';
+  if (i === 2) return 'rank-3';
+  return 'rank-default';
+}
+
+function rankIcon(i) {
+  if (i === 0) return '<i class="fa-solid fa-crown text-xs"></i>';
+  return i + 1;
+}
+
+function playerKey(p) { return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`; }
+
+function sortData(data) {
+  return [...data].sort((a, b) => {
+    const diff = (b.integrity_score || 0) - (a.integrity_score || 0);
+    return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0);
+  });
+}
+
+function scoreColor(score) {
+  if (score >= 80) return '#00ffa3';
+  if (score >= 50) return '#fbbf24';
+  return '#ff3b5c';
+}
+
+function scoreRingSVG(score) {
+  const r = 22, c = 2 * Math.PI * r, offset = c - (score / 100) * c;
+  const col = scoreColor(score);
+  return `<svg width="52" height="52" viewBox="0 0 52 52">
+    <circle cx="26" cy="26" r="${r}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="3"/>
+    <circle cx="26" cy="26" r="${r}" fill="none" stroke="${col}" stroke-width="3"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ── Build Row HTML ──
+function buildRow(player, index, isNew) {
+  const score = player.integrity_score || 0;
+  return `
+  <div class="player-row glass glow-border rounded-2xl px-5 py-3 flex items-center gap-3 cursor-default ${isNew ? 'new-entry' : ''}"
+       data-key="${playerKey(player)}">
+    <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
+    <div class="flex-1 min-w-0 ml-1">
+      <p class="font-semibold text-sm text-slate-100 truncate">${player.player_name}</p>
+      <p class="text-[0.65rem] text-slate-500 sm:hidden">${score}% • ${formatTime(player.duration_seconds)}</p>
+    </div>
+    <div class="score-ring hidden sm:flex">
+      ${scoreRingSVG(score)}
+      <span class="text-xs font-bold stat-value" style="color:${scoreColor(score)}">${score}</span>
+    </div>
+    <div class="w-24 text-center hidden sm:block">
+      <span class="stat-value text-sm text-slate-300">${formatTime(player.duration_seconds)}</span>
+    </div>
+    <div class="w-28 text-center">${statusBadge(player.surgery_status)}</div>
+  </div>`;
+}
+
+// ── Update Stats Bar ──
+function updateStats(data) {
+  if (!data.length) return;
+  const scores = data.map(d => d.integrity_score || 0);
+  const top = Math.max(...scores);
+  const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+  const completed = data.filter(d => (d.surgery_status || '').toLowerCase() === 'completed').length;
+  const rate = Math.round((completed / data.length) * 100);
+
+  gsap.to('#topScore', { textContent: top, duration: 0.6, snap: { textContent: 1 },
+    onUpdate() { document.getElementById('topScore').textContent = Math.round(gsap.getProperty('#topScore', 'textContent')) + '%'; }});
+  document.getElementById('avgScore').textContent = avg + '%';
+  document.getElementById('successRate').textContent = rate + '%';
+  document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
+}
+
+// ── Render Leaderboard ──
+function renderLeaderboard(data, isInitial) {
+  const board = document.getElementById('leaderboard');
+  const sorted = sortData(data);
+
+  // Detect new entries
+  const newKeys = new Set(sorted.map(playerKey));
+  const freshKeys = new Set();
+  newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
+  knownPlayerKeys = newKeys;
+
+  // Build HTML
+  const html = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
+  board.innerHTML = html;
+
+  // GSAP Animations
+  const rows = board.querySelectorAll('.player-row');
+  if (isInitial) {
+    gsap.from(rows, { y: 40, opacity: 0, duration: 0.5, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
+  } else if (freshKeys.size > 0) {
+    rows.forEach(row => {
+      if (freshKeys.has(row.dataset.key)) {
+        gsap.from(row, { x: -60, opacity: 0, duration: 0.6, ease: 'back.out(1.4)', clearProps: 'all' });
+      }
+    });
+  }
+
+  updateStats(sorted);
+  document.getElementById('lastUpdate').innerHTML =
+    `<i class="fa-solid fa-signal text-green-500"></i> Updated ${new Date().toLocaleTimeString()}`;
+}
+
+// ── Initial GSAP entrance ──
+function introAnimation() {
+  const tl = gsap.timeline();
+  tl.from('#header', { y: -40, opacity: 0, duration: 0.6, ease: 'power3.out' })
+    .from('#statsBar > div', { y: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, '-=0.2')
+    .from('footer', { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
+}
+
+// ── Fetch & Poll ──
+async function fetchData(isInitial = false) {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // Handle both {status,data} wrapper and raw array
+    const arr = Array.isArray(data) ? data : (data.data || []);
+    if (arr.length) {
+      renderLeaderboard(arr, isInitial);
+      previousData = arr;
+    } else if (isInitial) {
+      document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
+        `<div class="glass glow-border rounded-2xl p-12 text-center">
+          <i class="fa-solid fa-satellite-dish text-4xl text-cyan-500/30 mb-4 block"></i>
+          <p class="text-slate-500 text-sm">No surgeons yet — waiting for first entry…</p></div>`);
+    }
+  } catch (err) {
+    console.warn('VitalRush fetch error:', err);
+    document.getElementById('lastUpdate').innerHTML =
+      `<i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Reconnecting…`;
+  }
+}
+
+// ── Boot ──
+document.addEventListener('DOMContentLoaded', () => {
+  introAnimation();
+  fetchData(true);
+  setInterval(() => fetchData(false), POLL_INTERVAL);
+});
+</script>
+</body>
+</html>
