@@ -189,36 +189,97 @@ function loadModel() {
 
 function initScrollAnimations() {
   const t = '.scroll-content';
+
+  // 1. Setup Initial States
+  gsap.set('#features', { visibility: 'hidden', opacity: 0 });
+  gsap.set('#cta-wrapper', { visibility: 'hidden', clipPath: 'circle(0% at 50% 50%)' });
+  gsap.set('#features-left', { x: -150, opacity: 0 });
+  gsap.set('#features-right', { x: 150, opacity: 0 });
+  gsap.set('#features-grid .feature-card', { y: 150, opacity: 0 });
+  gsap.set('#cta-content', { y: 50, opacity: 0, scale: 0.95 });
+
+  // Background Animations (Increased Zoom)
   if (camera) {
     gsap.to(camera.position, {
-      x: camInitPos.x + camInitTarget.x * 20, y: camInitPos.y + camInitTarget.y * 20,
-      z: camInitPos.z + camInitTarget.z * 20, ease: 'none',
-      scrollTrigger: { trigger: t, start: 'top top', end: 'bottom bottom', scrub: 1.5 }
+      x: camInitPos.x + camInitTarget.x * 35, y: camInitPos.y + camInitTarget.y * 35,
+      z: camInitPos.z + camInitTarget.z * 35, ease: 'none',
+      scrollTrigger: { trigger: t, start: 'top top', end: '+=4000', scrub: 1.5 }
     });
   }
   if (dnaModel) {
     gsap.to(dnaModel.rotation, {
-      y: dnaModel.rotation.y + Math.PI * 4 + Math.PI / 4, ease: 'none',
-      scrollTrigger: { trigger: t, start: 'top top', end: 'bottom bottom', scrub: 1.5 }
+      y: dnaModel.rotation.y + Math.PI * 6, ease: 'none',
+      scrollTrigger: { trigger: t, start: 'top top', end: '+=4000', scrub: 1.5 }
     });
   }
-  gsap.fromTo('#hero-content', { opacity: 1, y: 0 }, {
-    opacity: 0, y: -60, ease: 'none',
-    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom 30%', scrub: true }
+
+  // Master Slide Timeline
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: t,
+      start: 'top top',
+      end: '+=4000', // Increased scroll distance
+      pin: true,
+      scrub: 1,
+      markers: true,
+      snap: {
+        snapTo: 'labels',
+        duration: { min: 0.3, max: 0.8 },
+        ease: 'power2.inOut'
+      }
+    }
   });
-  gsap.from('#features-header', {
-    y: 50, opacity: 0, duration: .8,
-    scrollTrigger: { trigger: '#features-header', start: 'top 85%', toggleActions: 'play reverse play reverse' }
-  });
-  gsap.from('#features-grid .feature-card', {
-    y: 60, opacity: 0, stagger: .15, duration: .6, ease: 'power3.out',
-    scrollTrigger: { trigger: '#features-grid', start: 'top 85%', toggleActions: 'play reverse play reverse' }
-  });
-  gsap.from('#cta-content', {
-    y: 50, opacity: 0, scale: .95, duration: .8,
-    scrollTrigger: { trigger: '#cta', start: 'top 80%', toggleActions: 'play reverse play reverse' }
-  });
+
+  // SLIDE 1 (Hero)
+  tl.addLabel('slide1')
+    .to({}, { duration: 0.5 }); // Pause
+
+  // TRANSITION: Hero Out
+  tl.to('#hero-headline', { rotationX: -60, y: -150, z: -400, opacity: 0, ease: 'power2.inOut', duration: 1 }, 'slide1_out')
+    .to('#hero-texts', { opacity: 0, x: -50, ease: 'power2.inOut', duration: 0.8 }, 'slide1_out')
+    .to('#hero-buttons', { opacity: 0, scale: 0.9, y: 50, ease: 'power2.inOut', duration: 0.8 }, 'slide1_out')
+    .to('#hero-stat', { opacity: 0, x: 100, ease: 'power2.inOut', duration: 0.8 }, 'slide1_out')
+    .to('#hero-scroll', { opacity: 0, y: 50, ease: 'power2.inOut', duration: 0.5 }, 'slide1_out')
+    .set('#hero', { visibility: 'hidden' });
+
+  // TRANSITION: Features In
+  tl.set('#features', { visibility: 'visible' })
+    .to('#features', { opacity: 1, duration: 0.1 }, 'slide2_in')
+    .to('#features-left', { x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 'slide2_in')
+    .to('#features-right', { x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 'slide2_in')
+    .to('#features-grid .feature-card', { y: 0, opacity: 1, stagger: 0.15, ease: 'back.out(1.2)', duration: 1 }, 'slide2_in');
+
+  // SLIDE 2 (Features)
+  tl.addLabel('slide2')
+    .to({}, { duration: 0.5 }); // Pause
+
+  // TRANSITION: Features Out
+  tl.to('#features', { opacity: 0, scale: 0.95, duration: 1, ease: 'power2.inOut' }, 'slide2_out')
+    .set('#features', { visibility: 'hidden' });
+    
+  // TRANSITION: CTA In
+  tl.set('#cta-wrapper', { visibility: 'visible' })
+    .to('#cta-wrapper', { clipPath: 'circle(150% at 50% 50%)', ease: 'power2.inOut', duration: 1.5 }, 'slide3_in')
+    .to('#cta-content', { y: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out' }, 'slide3_in+=0.3');
+
+  // SLIDE 3 (CTA)
+  tl.addLabel('slide3')
+    .to({}, { duration: 0.5 }); // Pause
+
   ScrollTrigger.create({ start: 80, onUpdate: s => { document.getElementById('navbar').classList.toggle('scrolled', s.scroll() > 80) } });
+
+  // Elastic Magnetic Buttons
+  document.querySelectorAll('.magnetic-btn').forEach(btn => {
+    btn.addEventListener('mousemove', e => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      gsap.to(btn, { x: x * 0.4, y: y * 0.4, duration: 0.4, ease: 'power3.out' });
+    });
+    btn.addEventListener('mouseleave', () => {
+      gsap.to(btn, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)' });
+    });
+  });
 }
 
 function animate() {

@@ -54,18 +54,29 @@
       z-index: 0
     }
 
-    /* Scrollable Content Layer */
+    /* Scrollable Content Layer (Pinned) */
     .scroll-content {
       position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
       z-index: 10
     }
 
     .section {
-      min-height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
       display: flex;
       align-items: center;
-      position: relative;
-      padding: 6rem 4rem 4rem
+      padding: 6rem 4rem 4rem;
+      visibility: hidden;
+    }
+    
+    #hero {
+      visibility: visible;
     }
 
     /* Light glassmorphism panels */
@@ -258,7 +269,7 @@
     </div>
     <div class="flex items-center gap-3">
       <a href="#cta"
-        class="text-xs bg-black text-white px-5 py-2.5 rounded-xl hover:bg-black/80 transition-colors font-medium">
+        class="magnetic-btn text-xs bg-black text-white px-5 py-2.5 rounded-xl hover:bg-black/80 transition-colors font-medium inline-block">
         <i class="fa-solid fa-play mr-1.5"></i> Launch VR
       </a>
     </div>
@@ -278,29 +289,31 @@
             <div class="pulse-dot"></div>
             <span>Live at Ignite 26</span>
           </div>
-          <h1 class="font-inter text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tight leading-[0.95] mb-6">
+          <h1 id="hero-headline" class="font-inter text-5xl md:text-7xl lg:text-[5.5rem] font-black tracking-tight leading-[0.95] mb-6" style="transform-origin: bottom center; transform-style: preserve-3d;">
             TRAUMA.<br>DECISION.<br><span class="text-black/35">SURVIVAL.</span>
           </h1>
-          <div class="flex items-center gap-3 mb-6">
-            <div class="w-10 h-[2px] bg-black/20"></div>
-            <span class="text-xs text-black/40 tracking-widest uppercase font-medium">mediCrisis VR Platform</span>
+          <div id="hero-texts">
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-[2px] bg-black/20"></div>
+              <span class="text-xs text-black/40 tracking-widest uppercase font-medium">mediCrisis VR Platform</span>
+            </div>
+            <p class="text-base text-black/45 leading-relaxed mb-10 max-w-sm">
+              Real-time VR trauma simulation platform for surgical precision and emergency response training.
+            </p>
           </div>
-          <p class="text-base text-black/45 leading-relaxed mb-10 max-w-sm">
-            Real-time VR trauma simulation platform for surgical precision and emergency response training.
-          </p>
-          <div class="flex items-center gap-4">
+          <div id="hero-buttons" class="flex items-center gap-4">
             <a href="#features"
-              class="bg-black text-white pl-5 pr-6 py-3.5 text-sm font-semibold rounded-full hover:bg-black/80 transition-colors shadow-lg shadow-black/15 flex items-center gap-3">
+              class="magnetic-btn bg-black text-white pl-5 pr-6 py-3.5 text-sm font-semibold rounded-full hover:bg-black/80 transition-colors shadow-lg shadow-black/15 flex items-center gap-3">
               <i class="fa-solid fa-gamepad"></i>Enter Simulation <i class="fa-solid fa-arrow-right text-xs"></i>
             </a>
             <a href="#cta"
-              class="bg-white/60 border border-black/10 px-6 py-3.5 text-sm text-black/60 rounded-full hover:bg-white/80 transition-colors font-medium flex items-center gap-2 backdrop-blur-sm">
+              class="magnetic-btn bg-white/60 border border-black/10 px-6 py-3.5 text-sm text-black/60 rounded-full hover:bg-white/80 transition-colors font-medium flex items-center gap-2 backdrop-blur-sm">
               <i class="fa-solid fa-play text-xs"></i>Watch Clinical Demo
             </a>
           </div>
         </div>
         <!-- Right stat card -->
-        <div class="stat-card">
+        <div id="hero-stat" class="stat-card">
           <div class="w-10 h-10 rounded-xl bg-black/5 border border-black/8 flex items-center justify-center mb-5">
             <i class="fa-solid fa-chart-line text-black/40"></i>
           </div>
@@ -323,7 +336,7 @@
       <div class="max-w-7xl mx-auto w-full">
         <!-- Header area -->
         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-14" id="features-header">
-          <div class="max-w-lg">
+          <div id="features-left" class="max-w-lg">
             <div class="flex items-center gap-2 mb-4">
               <div class="pulse-dot"></div>
               <p class="text-xs text-black/40 tracking-widest uppercase font-semibold">Platform Capabilities</p>
@@ -337,7 +350,7 @@
             </a>
           </div>
           <!-- Stats -->
-          <div class="flex items-center gap-6">
+          <div id="features-right" class="flex items-center gap-6">
             <div class="flex items-center gap-4">
               <div class="w-11 h-11 rounded-xl bg-black/5 border border-black/8 flex items-center justify-center">
                 <i class="fa-solid fa-shield-halved text-black/35"></i>
@@ -410,7 +423,8 @@
     </section>
 
     <!-- SECTION 3: CTA -->
-    <section class="section" id="cta">
+    <div id="cta-wrapper" style="position: absolute; top: 0; left: 0; width: 100%; height: 100vh; overflow: hidden; visibility: hidden;">
+    <section class="section" id="cta" style="position: relative; visibility: visible;">
       <div class="w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-start lg:items-center justify-between gap-12" id="cta-content">
         <!-- Left content -->
         <div class="max-w-xl">
@@ -423,7 +437,7 @@
           </h2>
           <p class="text-base text-black/40 leading-relaxed mb-10 max-w-sm">Put on the headset. Pick up the scalpel.<br>Your patient is waiting.</p>
           <a href="leaderboard.html"
-            class="bg-black text-white pl-5 pr-7 py-4 rounded-full font-bold tracking-wide shadow-lg shadow-black/20 hover:bg-black/80 transition-colors inline-flex items-center gap-2">
+            class="magnetic-btn bg-black text-white pl-5 pr-7 py-4 rounded-full font-bold tracking-wide shadow-lg shadow-black/20 hover:bg-black/80 transition-colors inline-flex items-center gap-2">
             <i class="fa-solid fa-play text-sm"></i>View Live Leaderboard
           </a>
           <div class="flex items-center gap-3 mt-10">
@@ -450,8 +464,8 @@
         </div>
       </div>
     </section>
+    </div>
 
-    <div style="height:50vh"></div>
   </div>
   </div>
   </div>
