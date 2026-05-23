@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
 <script>
 tailwind.config = {
   theme: {
@@ -35,9 +36,8 @@ body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-h
 #vr-cursor.hover .brackets { border-color: rgba(255,255,255,1); animation: spin 4s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* Light Theme Grid */
-.bg-grid { position: fixed; inset: 0; z-index: 0; opacity: 0.05; background-image: linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px); background-size: 40px 40px; animation: gridMove 15s linear infinite; }
-@keyframes gridMove { 0% { transform: translateY(0); } 100% { transform: translateY(40px); } }
+/* Three.js Grid Canvas */
+#grid-canvas { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
 
 /* Light Theme Glass */
 .glass { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(0, 0, 0, 0.06); }
@@ -64,9 +64,8 @@ body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-h
 .score-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
 .stat-value { font-family: 'Doto', monospace; }
 
-.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.1) transparent; }
-.scroll-container::-webkit-scrollbar { width: 4px; }
-.scroll-container::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+.scroll-container { max-height: calc(100vh - 280px); overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+.scroll-container::-webkit-scrollbar { display: none; }
 
 .new-entry { animation: newGlow 1.5s ease-out; }
 @keyframes newGlow { 0% { box-shadow: 0 0 40px rgba(0,0,0,0.1); border-color: #000; } 100% { box-shadow: none; } }
@@ -75,7 +74,7 @@ body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-h
 </style>
 </head>
 <body class="flex flex-col min-h-screen">
-<div class="bg-grid"></div>
+<canvas id="grid-canvas"></canvas>
 
 <!-- Custom VR Cursor -->
 <div id="vr-cursor">
@@ -134,7 +133,7 @@ body { background: #ffffff; color: #000; font-family: 'Inter', sans-serif; min-h
     <span class="flex-1 ml-2">Surgeon</span>
     <span class="w-20 text-center hidden sm:block">Integrity</span>
     <span class="w-24 text-center hidden sm:block">Duration</span>
-    <span class="w-28 text-center">Status</span>
+    <span class="w-32 text-center">Status</span>
   </div>
 
   <!-- Leaderboard -->
@@ -242,7 +241,7 @@ function buildRow(player, index, isNew) {
     <div class="w-24 text-center hidden sm:block">
       <span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span>
     </div>
-    <div class="w-28 text-center">${statusBadge(player.surgery_status)}</div>
+    <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`;
 }
 
@@ -320,6 +319,72 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchData(true);
   setInterval(() => fetchData(false), POLL_INTERVAL);
 });
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const gridVS = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
+const gridFS = `
+uniform float uTime; uniform vec2 uMouse,uResolution; varying vec2 vUv;
+void main(){
+  float a=uResolution.x/uResolution.y, gs=35.0;
+  vec2 uv=vec2(vUv.x*a,vUv.y)*gs;
+  vec2 mg=vec2((uMouse.x*.5+.5)*a,uMouse.y*.5+.5)*gs;
+  vec2 cid=floor(uv), cc=cid+.5;
+  float dm=distance(cc,mg);
+  float wave=sin(dm*1.2-uTime*3.)*.06*smoothstep(12.,0.,dm);
+  float push=smoothstep(8.,0.,dm);
+  vec2 pd=normalize(cc-mg+.001);
+  vec2 cl=fract(uv)-pd*push*.18-pd*wave;
+  float hs=(.85-push*.2)*.5, bw=.025;
+  vec2 fc=abs(cl-.5);
+  float o=step(fc.x,hs)*step(fc.y,hs)-step(fc.x,hs-bw)*step(fc.y,hs-bw);
+  vec3 bg=vec3(1.);
+  vec3 ln=vec3(0.);
+  float la=0.5+push*.5;
+  gl_FragColor=vec4(mix(bg,ln,o*la),1.);
+}`;
+
+const canvas = document.getElementById('grid-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
+
+const scene = new THREE.Scene();
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+const mouse = new THREE.Vector2(0, 0);
+
+const mat = new THREE.ShaderMaterial({
+  vertexShader: gridVS, fragmentShader: gridFS,
+  uniforms: {
+    uTime: { value: 0 }, uMouse: { value: new THREE.Vector2() },
+    uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) }
+  },
+  depthWrite: false, depthTest: false
+});
+const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+mesh.frustumCulled = false;
+scene.add(mesh);
+
+const clock = new THREE.Clock();
+
+addEventListener('mousemove', e => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+});
+
+addEventListener('resize', () => {
+  renderer.setSize(innerWidth, innerHeight);
+  mat.uniforms.uResolution.value.set(innerWidth, innerHeight);
+});
+
+(function animate() {
+  requestAnimationFrame(animate);
+  mat.uniforms.uTime.value = clock.getElapsedTime();
+  mat.uniforms.uMouse.value.copy(mouse);
+  renderer.render(scene, camera);
+})();
 </script>
 </body>
 </html>
