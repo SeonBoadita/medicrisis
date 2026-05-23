@@ -192,7 +192,7 @@ function initScrollAnimations() {
 
   // 1. Setup Initial States
   gsap.set('#features', { visibility: 'hidden', opacity: 0 });
-  gsap.set('#cta-wrapper', { visibility: 'hidden', clipPath: 'circle(0% at 50% 50%)' });
+  gsap.set('#cta-wrapper', { visibility: 'hidden', clipPath: 'circle(0vmax at 50% 50%)' });
   gsap.set('#features-left', { x: -150, opacity: 0 });
   gsap.set('#features-right', { x: 150, opacity: 0 });
   gsap.set('#features-grid .feature-card', { y: 150, opacity: 0 });
@@ -201,8 +201,8 @@ function initScrollAnimations() {
   // Background Animations (Increased Zoom)
   if (camera) {
     gsap.to(camera.position, {
-      x: camInitPos.x + camInitTarget.x * 35, y: camInitPos.y + camInitTarget.y * 35,
-      z: camInitPos.z + camInitTarget.z * 35, ease: 'none',
+      x: camInitPos.x + camInitTarget.x * 60, y: camInitPos.y + camInitTarget.y * 60,
+      z: camInitPos.z + camInitTarget.z * 60, ease: 'none',
       scrollTrigger: { trigger: t, start: 'top top', end: '+=4000', scrub: 1.5 }
     });
   }
@@ -221,7 +221,6 @@ function initScrollAnimations() {
       end: '+=4000', // Increased scroll distance
       pin: true,
       scrub: 1,
-      markers: true,
       snap: {
         snapTo: 'labels',
         duration: { min: 0.3, max: 0.8 },
@@ -256,10 +255,14 @@ function initScrollAnimations() {
   // TRANSITION: Features Out
   tl.to('#features', { opacity: 0, scale: 0.95, duration: 1, ease: 'power2.inOut' }, 'slide2_out')
     .set('#features', { visibility: 'hidden' });
-    
+
   // TRANSITION: CTA In
   tl.set('#cta-wrapper', { visibility: 'visible' })
-    .to('#cta-wrapper', { clipPath: 'circle(150% at 50% 50%)', ease: 'power2.inOut', duration: 1.5 }, 'slide3_in')
+    .set('#cta-ring', { visibility: 'visible', width: 0, height: 0, opacity: 0 })
+    .to('#cta-wrapper', { clipPath: 'circle(150vmax at 50% 50%)', ease: 'power2.inOut', duration: 1.5 }, 'slide3_in')
+    .to('#cta-ring', { width: '300vmax', height: '300vmax', ease: 'power2.inOut', duration: 1.5 }, 'slide3_in')
+    .to('#cta-ring', { opacity: 1, duration: 0.3 }, 'slide3_in+=0.3')
+    .to('#cta-ring', { opacity: 0, duration: 0.3 }, 'slide3_in+=1.2')
     .to('#cta-content', { y: 0, opacity: 1, scale: 1, duration: 1, ease: 'power3.out' }, 'slide3_in+=0.3');
 
   // SLIDE 3 (CTA)
