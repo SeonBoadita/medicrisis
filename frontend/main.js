@@ -201,8 +201,8 @@ function initScrollAnimations() {
   // Background Animations (Increased Zoom)
   if (camera) {
     gsap.to(camera.position, {
-      x: camInitPos.x + camInitTarget.x * 54, y: camInitPos.y + camInitTarget.y * 54,
-      z: camInitPos.z + camInitTarget.z * 54, ease: 'none',
+      x: camInitPos.x + camInitTarget.x * 48, y: camInitPos.y + camInitTarget.y * 48,
+      z: camInitPos.z + camInitTarget.z * 48, ease: 'none',
       scrollTrigger: { trigger: t, start: 'top top', end: '+=4000', scrub: 1.5 }
     });
   }
