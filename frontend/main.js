@@ -201,8 +201,8 @@ function initScrollAnimations() {
   // Background Animations (Increased Zoom)
   if (camera) {
     gsap.to(camera.position, {
-      x: camInitPos.x + camInitTarget.x * 60, y: camInitPos.y + camInitTarget.y * 60,
-      z: camInitPos.z + camInitTarget.z * 60, ease: 'none',
+      x: camInitPos.x + camInitTarget.x * 54, y: camInitPos.y + camInitTarget.y * 54,
+      z: camInitPos.z + camInitTarget.z * 54, ease: 'none',
       scrollTrigger: { trigger: t, start: 'top top', end: '+=4000', scrub: 1.5 }
     });
   }
@@ -336,13 +336,26 @@ async function init() {
   try { await loadModel() } catch (e) { console.error(e) }
   initScrollAnimations(); animate(); hideLoader();
   addEventListener('resize', onResize);
-  let _mf = 0;
+
+  // Custom VR Cursor Physics
+  const vrCursor = document.getElementById('vr-cursor');
+  let cx = 0, cy = 0;
   addEventListener('mousemove', e => {
-    if (_mf++ % 2) return;
     mouse.x = (e.clientX / innerWidth) * 2 - 1;
     mouse.y = -(e.clientY / innerHeight) * 2 + 1;
     mouseSpeed = Math.min(Math.abs(e.movementX) + Math.abs(e.movementY), 50);
+    cx = e.clientX; cy = e.clientY;
   });
+  gsap.ticker.add(() => {
+    gsap.set(vrCursor, { x: cx, y: cy });
+  });
+
+  // VR Cursor Hover States
+  document.querySelectorAll('a, button, .magnetic-btn, .feature-card').forEach(el => {
+    el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
+  });
+
   console.log('[mediCrisis] Ready ✓');
 }
 document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
