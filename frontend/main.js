@@ -52,7 +52,7 @@ function initRenderer() {
   const c = document.getElementById('three-canvas');
   renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true });
   renderer.setSize(innerWidth, innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.2;
@@ -316,7 +316,7 @@ function animate() {
 
 function onResize() {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+  renderer.setSize(innerWidth, innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
   if (gridMesh) gridMesh.material.uniforms.uResolution.value.set(innerWidth, innerHeight);
   gridRT.setSize(innerWidth, innerHeight);
 }
