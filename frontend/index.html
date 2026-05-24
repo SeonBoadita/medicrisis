@@ -26,7 +26,7 @@
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}
 </script>
 
-  <style>
+  <style type="text/tailwindcss">
     * {
       margin: 0;
       padding: 0;
@@ -170,22 +170,12 @@
 
     /* Light glassmorphism panels */
     .glass-light {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 1.25rem
+      @apply backdrop-blur-md bg-white/60 dark:bg-black/60 border border-black/5 dark:border-white/10 rounded-[1.25rem];
     }
 
     /* Stat card */
     .stat-card {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 1.25rem;
-      padding: 1.75rem;
-      min-width: 200px
+      @apply backdrop-blur-md bg-white/60 dark:bg-black/60 border border-black/5 dark:border-white/10 rounded-[1.25rem] p-7 min-w-[200px] shadow-lg;
     }
 
     /* Scroll indicator */
@@ -273,11 +263,7 @@
 
     /* Feature Cards — light glass */
     .feature-card {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
-      border-radius: 1.25rem;
+      @apply backdrop-blur-md bg-white/55 dark:bg-black/55 border border-black/5 dark:border-white/10 rounded-[1.25rem];
       transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease
     }
 

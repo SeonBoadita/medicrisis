@@ -10,6 +10,9 @@ let camInitPos = new THREE.Vector3(), camInitTarget = new THREE.Vector3();
 let mouse = new THREE.Vector2(0, 0), mouseSpeed = 0;
 let dnaMeshes = [], shaderRefs = [];
 let gridRT, bgScene, bgCamera, glassMat;
+let cellInstancedMesh, dummy = new THREE.Object3D();
+let isRendering = true;
+let cellData = [];
 
 // ── GRID SHADER ──
 const gridVS = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
@@ -283,10 +286,38 @@ function initScrollAnimations() {
       gsap.to(btn, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.3)' });
     });
   });
+
+  // ═══ INSTANCED MESH CELLULAR BACKGROUND ═══
+  const cellCount = 800;
+  const cellGeo = new THREE.IcosahedronGeometry(0.15, 1);
+  const cellMat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, transmission: 0.9, opacity: 1, metalness: 0, roughness: 0.2, ior: 1.5,
+    thickness: 0.5, specularIntensity: 1, envMapIntensity: 1.5, transparent: true
+  });
+  cellInstancedMesh = new THREE.InstancedMesh(cellGeo, cellMat, cellCount);
+  cellInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  
+  for(let i = 0; i < cellCount; i++) {
+    const x = (Math.random() - 0.5) * 40;
+    const y = (Math.random() - 0.5) * 40;
+    const z = (Math.random() - 0.5) * 40 - 10;
+    const speed = 0.05 + Math.random() * 0.1;
+    const phase = Math.random() * Math.PI * 2;
+    cellData.push({x, y, z, speed, phase});
+    
+    dummy.position.set(x, y, z);
+    dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+    const scale = 0.2 + Math.random() * 0.8;
+    dummy.scale.set(scale, scale, scale);
+    dummy.updateMatrix();
+    cellInstancedMesh.setMatrixAt(i, dummy.matrix);
+  }
+  scene.add(cellInstancedMesh);
 }
 
 function animate() {
   requestAnimationFrame(animate);
+  if (!isRendering) return;
   const t = clock.getElapsedTime();
 
   // Per-node pulse
@@ -303,6 +334,21 @@ function animate() {
   if (gridMesh) {
     gridMesh.material.uniforms.uTime.value = t;
     gridMesh.material.uniforms.uMouse.value.copy(mouse);
+  }
+
+  // Animate InstancedMesh Cells
+  if (cellInstancedMesh) {
+    for (let i = 0; i < 800; i++) {
+      const data = cellData[i];
+      data.y += data.speed * 0.2;
+      if (data.y > 20) data.y = -20;
+      dummy.position.set(data.x + Math.sin(t * data.speed + data.phase) * 2, data.y, data.z);
+      dummy.rotation.set(t * data.speed, t * data.speed * 0.5, 0);
+      dummy.scale.setScalar(0.5 + Math.sin(t * 2 + data.phase) * 0.2);
+      dummy.updateMatrix();
+      cellInstancedMesh.setMatrixAt(i, dummy.matrix);
+    }
+    cellInstancedMesh.instanceMatrix.needsUpdate = true;
   }
 
   // Render grid to RT for transmission refraction
@@ -355,6 +401,16 @@ async function init() {
     el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
     el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
   });
+
+  // ═══ INTERSECTION OBSERVER FOR PERFORMANCE ═══
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      isRendering = entry.isIntersecting;
+    });
+  }, { threshold: 0.01 });
+  
+  const targetSection = document.getElementById('hero') || document.body;
+  observer.observe(targetSection);
 
   console.log('[mediCrisis] Ready ✓');
 }

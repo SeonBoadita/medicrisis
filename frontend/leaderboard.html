@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script
     type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
   <script>
@@ -155,10 +157,15 @@
       color: #fff;
     }
 
+    /* Spatial Heatmap Container */
+    #heatmap-container {
+      background-image: url('asserts/clinical_overlay.png'); /* Mock background */
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
     .player-row {
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(0, 0, 0, 0.06);
       transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
     }
 
@@ -339,43 +346,74 @@
   <main class="relative z-10 flex-1 px-4 pt-28 pb-3 max-w-7xl mx-auto w-full flex flex-col overflow-hidden">
     <!-- Stats Bar -->
     <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
-      <div class="glass rounded-2xl p-4 text-center">
-        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-trophy text-black/30 mr-1"></i>Top Score</p>
-        <p id="topScore" class="stat-value text-2xl font-black text-black">—</p>
+      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-trophy text-black/40 dark:text-white/40 mr-1"></i>Top Score</p>
+        <p id="topScore" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-bolt text-black/30 mr-1"></i>Avg Integrity</p>
-        <p id="avgScore" class="stat-value text-2xl font-black text-black">—</p>
+      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-bolt text-black/40 dark:text-white/40 mr-1"></i>Avg Integrity</p>
+        <p id="avgScore" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
       </div>
-      <div class="glass rounded-2xl p-4 text-center">
-        <p class="text-[0.65rem] text-black/40 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-check-double text-black/30 mr-1"></i>Success Rate</p>
-        <p id="successRate" class="stat-value text-2xl font-black text-black">—</p>
+      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-check-double text-black/40 dark:text-white/40 mr-1"></i>Success Rate</p>
+        <p id="successRate" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
       </div>
     </div>
 
-    <!-- Leaderboard Panel (Glass Container) -->
-    <div class="glass rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8">
-      <!-- Column Headers -->
-      <div
-        class="flex items-center px-5 py-3 text-[0.65rem] text-black/40 uppercase tracking-widest font-bold border-b border-black/5">
-        <span class="w-14">Rank</span>
-        <span class="flex-1 ml-2">Surgeon</span>
-        <span class="w-20 text-center hidden sm:block">Integrity</span>
-        <span class="w-24 text-center hidden sm:block">Duration</span>
-        <span class="w-32 text-center">Status</span>
+    <div class="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
+      
+      <!-- Leaderboard Panel -->
+      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 dark:border-white/10 shadow-lg w-full lg:w-1/2">
+        <!-- Column Headers -->
+        <div
+          class="flex items-center px-5 py-3 text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest font-bold border-b border-black/5 dark:border-white/5">
+          <span class="w-14">Rank</span>
+          <span class="flex-1 ml-2">Surgeon (Elo Rank)</span>
+          <span class="w-20 text-center hidden sm:block">Integrity</span>
+          <span class="w-24 text-center hidden sm:block">Duration</span>
+          <span class="w-32 text-center">Status</span>
+        </div>
+
+        <!-- Leaderboard (only this scrolls) -->
+        <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
+          <div id="emptyState" class="rounded-2xl p-12 text-center">
+            <i class="fa-solid fa-satellite-dish text-4xl text-black/30 dark:text-white/30 mb-4"></i>
+            <p class="text-black/60 dark:text-white/60 text-sm font-medium">Awaiting surgeon data feed…</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Leaderboard (only this scrolls) -->
-      <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
-        <div id="emptyState" class="rounded-2xl p-12 text-center">
-          <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4"></i>
-          <p class="text-black/50 text-sm font-medium">Awaiting surgeon data feed…</p>
+      <!-- Analytics Dashboard (Phase 4) -->
+      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 dark:border-white/10 shadow-lg w-full lg:w-1/2 p-4">
+        <h3 class="text-xs text-black/60 dark:text-white/60 font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-chart-pie mr-2"></i>Enterprise Telemetry</h3>
+        
+        <!-- Time-Series Chart -->
+        <div class="flex-1 relative mb-4">
+          <canvas id="timeSeriesChart"></canvas>
+        </div>
+
+        <!-- Spatial Error Heatmap (Mocked overlay) -->
+        <div class="flex-1 relative rounded-xl border border-black/5 dark:border-white/5 overflow-hidden flex items-center justify-center bg-black/5 dark:bg-white/5" id="heatmap-container">
+            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.1));"></div>
+            <p class="text-black/40 dark:text-white/40 text-xs font-bold uppercase tracking-widest z-10"><i class="fa-solid fa-map-location-dot mr-1"></i> Spatial Error Heatmap Active</p>
+            <!-- Generated heatmap spots -->
+            <div id="heatmap-spots" class="absolute inset-0 w-full h-full pointer-events-none"></div>
         </div>
       </div>
     </div>
+    
+    <!-- AI Debrief Notification System -->
+    <div id="ai-debrief-toast" class="fixed bottom-20 right-6 backdrop-blur-md bg-black/80 border border-white/20 rounded-2xl p-4 w-80 shadow-2xl translate-x-[120%] transition-transform duration-500 z-50">
+      <div class="flex items-center gap-2 mb-2">
+        <i class="fa-solid fa-robot text-[#00ff88]"></i>
+        <span class="text-[#00ff88] text-xs font-bold tracking-widest uppercase">AI Clinical Debrief</span>
+      </div>
+      <p id="ai-debrief-text" class="text-white/90 text-sm leading-relaxed font-medium">Analysis complete.</p>
+    </div>
+
   </main>
 
   <!-- ═══ FOOTER (Fixed Bottom) ═══ -->
@@ -462,11 +500,19 @@
 
     function buildRow(player, index, isNew) {
       const score = player.integrity_score || 0;
+      
+      // Tiered Progression (Phase 4)
+      let eloRank = "Resident";
+      if (score >= 95) eloRank = "Chief Attending";
+      else if (score >= 80) eloRank = "Fellow";
+      else if (score >= 60) eloRank = "Senior Resident";
+
       return `
-  <div class="player-row rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
+  <div class="player-row backdrop-blur-md bg-white/60 dark:bg-black/60 border border-black/5 dark:border-white/5 rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
     <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
     <div class="flex-1 min-w-0 ml-1">
-      <p class="font-bold text-sm text-black truncate">${player.player_name}</p>
+      <p class="font-bold text-sm text-black dark:text-white truncate">${player.player_name}</p>
+      <p class="text-[0.65rem] font-bold text-black/50 dark:text-white/50 tracking-wide">${eloRank}</p>
       <p class="text-[0.65rem] font-bold text-black/40 sm:hidden">${score}% • ${formatTime(player.duration_seconds)}</p>
     </div>
     <div class="score-ring hidden sm:flex">
@@ -474,7 +520,7 @@
       <span class="text-xs font-black stat-value" style="color:${scoreColor(score)}">${score}</span>
     </div>
     <div class="w-24 text-center hidden sm:block">
-      <span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span>
+      <span class="stat-value font-bold text-sm text-black/70 dark:text-white/70">${formatTime(player.duration_seconds)}</span>
     </div>
     <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`;
@@ -495,6 +541,59 @@
       document.getElementById('avgScore').textContent = avg + '%';
       document.getElementById('successRate').textContent = rate + '%';
       document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
+    }
+
+    // Time-Series Analytics (Phase 4)
+    let timeSeriesChart;
+    function initChart() {
+      const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+      timeSeriesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [{
+            label: 'Integrity Score',
+            data: [],
+            borderColor: '#000',
+            backgroundColor: 'rgba(0,0,0,0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    function updateChart(data) {
+      if(!timeSeriesChart) return;
+      // Last 30 simulations
+      const recent = data.slice(0, 30).reverse();
+      timeSeriesChart.data.labels = recent.map(d => d.player_name.split(' ')[0] || '');
+      timeSeriesChart.data.datasets[0].data = recent.map(d => parseInt(d.integrity_score) || 0);
+      timeSeriesChart.update();
+    }
+
+    function addHeatmapSpot() {
+      const spots = document.getElementById('heatmap-spots');
+      const spot = document.createElement('div');
+      spot.style.position = 'absolute';
+      spot.style.left = (Math.random() * 80 + 10) + '%';
+      spot.style.top = (Math.random() * 80 + 10) + '%';
+      spot.style.width = '20px';
+      spot.style.height = '20px';
+      spot.style.background = 'radial-gradient(circle, rgba(255,59,92,0.8) 0%, rgba(255,59,92,0) 70%)';
+      spot.style.borderRadius = '50%';
+      spots.appendChild(spot);
     }
 
     function renderLeaderboard(data, isInitial) {
@@ -521,7 +620,18 @@
 
       attachHover();
       updateStats(sorted);
+      updateChart(sorted);
       document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-check text-black"></i> Live sync active`;
+    }
+
+    function showAIDebrief(text) {
+      if(!text) return;
+      document.getElementById('ai-debrief-text').textContent = text;
+      const toast = document.getElementById('ai-debrief-toast');
+      toast.classList.remove('translate-x-[120%]');
+      setTimeout(() => {
+        toast.classList.add('translate-x-[120%]');
+      }, 8000);
     }
 
     function introAnimation() {
@@ -532,29 +642,57 @@
       attachHover();
     }
 
+    let cachedData = [];
     async function fetchData(isInitial = false) {
       try {
-        const res = await fetch(API_URL);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch('http://localhost:3000/api/leaderboard?hospital_id=public').catch(() => fetch(API_URL));
+        if (!res || !res.ok) throw new Error(`HTTP Fetch failed`);
         const data = await res.json();
-        const arr = Array.isArray(data) ? data : (data.data || []);
-        if (arr.length) {
-          renderLeaderboard(arr, isInitial);
+        cachedData = Array.isArray(data) ? data : (data.data || []);
+        if (cachedData.length) {
+          renderLeaderboard(cachedData, isInitial);
         } else if (isInitial) {
           document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
-            `<div class="glass rounded-2xl p-12 text-center">
-          <i class="fa-solid fa-satellite-dish text-4xl text-black/20 mb-4 block"></i>
-          <p class="text-black/50 text-sm font-medium">No surgeons yet — waiting for first entry…</p></div>`);
+            `<div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-12 text-center">
+          <i class="fa-solid fa-satellite-dish text-4xl text-black/20 block mb-4"></i>
+          <p class="text-black/60 text-sm font-medium">No surgeons yet — waiting for first entry…</p></div>`);
         }
       } catch (err) {
         document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`;
       }
     }
 
+    // Live Socket Architecture (Phase 3)
+    function initWebSocket() {
+      try {
+        const socket = io('http://localhost:3000');
+        socket.on('connect', () => {
+          socket.emit('join_tenant', 'public');
+          document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-bolt text-[#00ff88]"></i> Socket Connected`;
+        });
+        socket.on('new_score', (payload) => {
+           cachedData.push(payload);
+           renderLeaderboard(cachedData, false);
+           addHeatmapSpot();
+           if(payload.ai_debrief) {
+              showAIDebrief(payload.ai_debrief);
+           }
+        });
+        socket.on('disconnect', () => {
+           document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Socket Disconnected`;
+        });
+      } catch (e) {
+        console.warn("WebSocket not available. Falling back to polling.");
+        setInterval(() => fetchData(false), POLL_INTERVAL);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       introAnimation();
-      fetchData(true);
-      setInterval(() => fetchData(false), POLL_INTERVAL);
+      initChart();
+      fetchData(true).then(() => {
+          initWebSocket();
+      });
     });
   </script>
 
