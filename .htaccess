@@ -1,0 +1,24 @@
+# AAA Standard Security Rules
+
+# 1. Disable directory browsing
+Options -Indexes
+
+# 2. Block access to the backend folder completely
+RedirectMatch 404 ^/medicrisis/backend/.*$
+
+# 3. Block access to sensitive files (like .env, .git, etc.) anywhere in the structure
+<FilesMatch "^\.env|\.git|\.gitignore|package\.json|package-lock\.json|.*\.log$">
+    Require all denied
+</FilesMatch>
+
+# 4. Deny direct access to all .js files EXCEPT in the frontend directory
+RewriteEngine On
+RewriteCond %{REQUEST_URI} \.js$
+RewriteCond %{REQUEST_URI} !/frontend/
+RewriteRule ^ - [F,L]
+
+# 5. Deny direct access to all .php files EXCEPT the designated APIs
+RewriteCond %{REQUEST_URI} \.php$
+RewriteCond %{REQUEST_URI} !/api\.php$
+RewriteCond %{REQUEST_URI} !/start_server\.php$
+RewriteRule ^ - [F,L]

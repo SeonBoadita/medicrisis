@@ -336,9 +336,25 @@ app.post('/api/evaluate-surgery', async (req, res) => {
     }
 });
 
+// 5. Shutdown Endpoint
+app.post('/api/shutdown', (req, res) => {
+    res.json({ message: "Shutting down..." });
+    console.log("Shutting down server via API...");
+    setTimeout(() => process.exit(0), 500);
+});
+
 // WebSocket Connection
+let clientCount = 0;
+let shutdownTimer = null;
+
 io.on('connection', (socket) => {
+    clientCount++;
     console.log('Client connected:', socket.id);
+    
+    if (shutdownTimer) {
+        clearTimeout(shutdownTimer);
+        shutdownTimer = null;
+    }
     
     socket.on('join_tenant', (hospitalId) => {
         socket.join(hospitalId);
@@ -346,7 +362,16 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        clientCount--;
         console.log('Client disconnected:', socket.id);
+        
+        if (clientCount === 0) {
+            console.log("No active clients. Starting 3 second shutdown timer...");
+            shutdownTimer = setTimeout(() => {
+                console.log("Shutting down server due to no active clients...");
+                process.exit(0);
+            }, 3000);
+        }
     });
 });
 

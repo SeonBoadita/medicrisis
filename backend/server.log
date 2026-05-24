@@ -1,0 +1,17 @@
+◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+Database connected successfully.
+Real-Time Infrastructure listening on port 3000
+Client connected: DXSdSKiqwEUuP6XSAAAB
+Socket DXSdSKiqwEUuP6XSAAAB joined tenant room: public
+MediCrisis Core: Receiving Payload. State: [PreOp_AwaitingScalpel]...
+MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.
+MediCrisis Core: Text Evaluation Complete.
+MediCrisis Core: Booting Deepgram Aura Voice Engine...
+MediCrisis Core: Voice Audio Binary Encoded successfully.
+MediCrisis Core: Transaction Fully Complete. Awaiting next command.
+MediCrisis Core: Receiving Payload. State: [PreOp_AwaitingScalpel]...
+MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.
+MediCrisis Core: Text Evaluation Complete.
+MediCrisis Core: Booting Deepgram Aura Voice Engine...
+MediCrisis Core: Voice Audio Binary Encoded successfully.
+MediCrisis Core: Transaction Fully Complete. Awaiting next command.

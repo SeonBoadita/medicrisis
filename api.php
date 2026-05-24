@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 // 2. Import the database connection
-require 'db.php';
+require 'backend/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 

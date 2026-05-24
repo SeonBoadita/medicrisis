@@ -165,7 +165,8 @@
 
     /* Spatial Heatmap Container */
     #heatmap-container {
-      background-image: url('asserts/clinical_overlay.png'); /* Mock background */
+      background-image: url('assets/clinical_overlay.png');
+      /* Mock background */
       background-size: cover;
       background-position: center;
       position: relative;
@@ -182,37 +183,45 @@
     }
 
     .rank-badge {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 10px;
-      font-weight: 800;
-      font-size: 0.9rem;
+      font-family: 'Doto', monospace;
+      font-weight: 900;
+      font-size: 1.25rem;
       flex-shrink: 0;
+      position: relative;
     }
 
     .rank-1 {
-      background: linear-gradient(135deg, #fbbf24, #f59e0b);
-      color: #fff;
-      box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+      color: #000;
+    }
+
+    .rank-1::after {
+      content: '';
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      background: #fbbf24;
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0.5;
     }
 
     .rank-2 {
-      background: linear-gradient(135deg, #94a3b8, #cbd5e1);
-      color: #fff;
+      color: rgba(0, 0, 0, 0.4);
     }
 
     .rank-3 {
-      background: linear-gradient(135deg, #cd7f32, #b8860b);
-      color: #fff;
+      color: rgba(0, 0, 0, 0.25);
     }
 
     .rank-default {
-      background: rgba(0, 0, 0, 0.05);
-      color: #000;
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      color: rgba(0, 0, 0, 0.1);
+      font-weight: 700;
     }
 
     .status-badge {
@@ -324,23 +333,36 @@
   <nav class="navbar flex items-center justify-between" id="navbar">
     <div class="flex items-center gap-4 group cursor-pointer">
       <a href="index.html" class="flex items-center gap-3 group-hover:opacity-90">
-        <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out" style="filter: brightness(0);">
-        <span class="font-doto text-3xl font-bold tracking-wider text-black opacity-90 group-hover:opacity-100 transition-opacity">medi<span class="font-black">Crisis</span></span>
+        <img src="assets/logo/mainLogo.svg"
+          class="w-12 h-12 object-contain group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out"
+          style="filter: brightness(0);">
+        <span
+          class="font-doto text-3xl font-bold tracking-wider text-black opacity-90 group-hover:opacity-100 transition-opacity">medi<span
+            class="font-black">Crisis</span></span>
       </a>
     </div>
-    
+
     <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-      <a href="index.html" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+      <a href="index.html"
+        class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10">Home</span>
-        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+        <div
+          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
+        </div>
       </a>
-      <a href="index.html#features" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+      <a href="index.html#features"
+        class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10">Features</span>
-        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+        <div
+          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
+        </div>
       </a>
-      <a href="leaderboard.html" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black hover:text-black transition-colors group overflow-hidden rounded-full">
+      <a href="leaderboard.html"
+        class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10">Leaderboard</span>
-        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+        <div
+          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
+        </div>
       </a>
     </div>
 
@@ -378,9 +400,10 @@
     </div>
 
     <div class="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
-      
+
       <!-- Leaderboard Panel -->
-      <div class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2">
+      <div
+        class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2">
         <!-- Column Headers -->
         <div
           class="flex items-center px-5 py-3 text-[0.65rem] text-black/60 uppercase tracking-widest font-bold border-b border-black/5">
@@ -401,26 +424,37 @@
       </div>
 
       <!-- Analytics Dashboard (Phase 4) -->
-      <div class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2 p-4">
-        <h3 class="text-xs text-black/60 font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-chart-pie mr-2"></i>Enterprise Telemetry</h3>
-        
+      <div
+        class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2 p-4">
+        <h3 class="text-xs text-black/60 font-bold uppercase tracking-widest mb-4"><i
+            class="fa-solid fa-chart-pie mr-2"></i>Enterprise Telemetry</h3>
+
         <!-- Time-Series Chart -->
         <div class="flex-1 relative mb-4">
           <canvas id="timeSeriesChart"></canvas>
         </div>
 
-        <!-- Spatial Error Heatmap (Mocked overlay) -->
-        <div class="flex-1 relative rounded-xl border border-black/5 overflow-hidden flex items-center justify-center bg-black/5" id="heatmap-container">
-            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.1));"></div>
-            <p class="text-black/40 text-xs font-bold uppercase tracking-widest z-10"><i class="fa-solid fa-map-location-dot mr-1"></i> Spatial Error Heatmap Active</p>
-            <!-- Generated heatmap spots -->
-            <div id="heatmap-spots" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+        <!-- Server Control Panel -->
+        <div class="flex-1 relative rounded-xl border border-black/5 overflow-hidden flex flex-col items-center justify-center bg-black/5 p-6 text-center" id="server-control-container">
+            <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.05));"></div>
+            
+            <i class="fa-solid fa-server text-3xl text-black/40 mb-4 z-10"></i>
+            <h4 class="text-sm font-bold text-black uppercase tracking-widest mb-2 z-10">Simulation Server</h4>
+            <p class="text-xs text-black/50 mb-6 max-w-xs z-10">Real-time telemetry and multiplayer physics engine.</p>
+            
+            <button id="serverActionBtn" onclick="toggleServer()" class="relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.1)] hover:shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:scale-105 group flex items-center gap-2">
+                <i class="fa-solid fa-power-off transition-transform"></i>
+                <span class="relative z-10">Initialize Server</span>
+                <div class="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+            </button>
+            <p id="serverStatusText" class="text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10">Server Offline</p>
         </div>
       </div>
     </div>
-    
+
     <!-- AI Debrief Notification System -->
-    <div id="ai-debrief-toast" class="fixed bottom-20 right-6 backdrop-blur-md bg-black/80 border border-white/20 rounded-2xl p-4 w-80 shadow-2xl translate-x-[120%] transition-transform duration-500 z-50">
+    <div id="ai-debrief-toast"
+      class="fixed bottom-20 right-6 backdrop-blur-md bg-black/80 border border-white/20 rounded-2xl p-4 w-80 shadow-2xl translate-x-[120%] transition-transform duration-500 z-50">
       <div class="flex items-center gap-2 mb-2">
         <i class="fa-solid fa-robot text-[#00ff88]"></i>
         <span class="text-[#00ff88] text-xs font-bold tracking-widest uppercase">AI Clinical Debrief</span>
@@ -582,7 +616,7 @@
     }
 
     function updateChart(data) {
-      if(!timeSeriesChart) return;
+      if (!timeSeriesChart) return;
       // Last 30 simulations
       const recent = data.slice(0, 30).reverse();
       timeSeriesChart.data.labels = recent.map(d => d.player_name.split(' ')[0] || '');
@@ -632,7 +666,7 @@
     }
 
     function showAIDebrief(text) {
-      if(!text) return;
+      if (!text) return;
       document.getElementById('ai-debrief-text').textContent = text;
       const toast = document.getElementById('ai-debrief-toast');
       toast.classList.remove('translate-x-[120%]');
@@ -647,6 +681,91 @@
         .from('#statsBar > div', { y: 30, opacity: 0, duration: 0.4, stagger: 0.1, ease: 'power2.out' }, '-=0.2')
         .from('footer', { y: 20, opacity: 0, duration: 0.4, ease: 'power2.out' }, '-=0.2');
       attachHover();
+    }
+
+    let isServerOnline = false;
+    let globalSocket = null;
+
+    async function toggleServer() {
+        if(isServerOnline) {
+            stopNodeServer();
+        } else {
+            startNodeServer();
+        }
+    }
+
+    function setButtonStateOnline() {
+        isServerOnline = true;
+        const btn = document.getElementById('serverActionBtn');
+        const statusText = document.getElementById('serverStatusText');
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+        btn.querySelector('span').textContent = 'Stop Server';
+        btn.querySelector('i').className = 'fa-solid fa-stop transition-transform';
+        btn.className = 'relative overflow-hidden z-10 bg-[#ff3b5c]/10 text-[#ff3b5c] px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(255,59,92,0.1)] hover:shadow-[0_0_30px_rgba(255,59,92,0.3)] hover:scale-105 group flex items-center gap-2 border border-[#ff3b5c]/30';
+        statusText.textContent = "Server Online & Connected";
+        statusText.className = "text-[10px] font-bold text-[#00ff88] mt-4 uppercase tracking-widest z-10";
+    }
+
+    function setButtonStateOffline() {
+        isServerOnline = false;
+        const btn = document.getElementById('serverActionBtn');
+        const statusText = document.getElementById('serverStatusText');
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+        btn.querySelector('span').textContent = 'Initialize Server';
+        btn.querySelector('i').className = 'fa-solid fa-power-off transition-transform';
+        btn.className = 'relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(0,0,0,0.1)] hover:shadow-[0_0_30px_rgba(0,0,0,0.3)] hover:scale-105 group flex items-center gap-2';
+        statusText.textContent = "Server Offline";
+        statusText.className = "text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10";
+    }
+
+    async function stopNodeServer() {
+      const btn = document.getElementById('serverActionBtn');
+      const statusText = document.getElementById('serverStatusText');
+      
+      btn.classList.add('opacity-50', 'pointer-events-none');
+      btn.querySelector('span').textContent = 'Stopping...';
+      btn.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin';
+      
+      statusText.textContent = "Shutting down telemetry engine...";
+      statusText.className = "text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10";
+
+      try {
+        await fetch('http://localhost:3000/api/shutdown', { method: 'POST' });
+      } catch (e) {}
+      if(globalSocket) globalSocket.disconnect();
+      setTimeout(setButtonStateOffline, 1000);
+    }
+
+    async function startNodeServer() {
+      const btn = document.getElementById('serverActionBtn');
+      const statusText = document.getElementById('serverStatusText');
+      
+      btn.classList.add('opacity-50', 'pointer-events-none');
+      btn.querySelector('span').textContent = 'Starting...';
+      btn.querySelector('i').className = 'fa-solid fa-power-off fa-spin';
+      
+      statusText.textContent = "Booting telemetry engine...";
+      statusText.className = "text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10";
+
+      try {
+        const res = await fetch('../start_server.php', { method: 'POST' });
+        const data = await res.json();
+        
+        if(data.success) {
+           statusText.textContent = "Server booted. Connecting...";
+           setTimeout(() => {
+             initWebSocket();
+           }, 1000);
+        } else {
+           throw new Error(data.error || "Failed to start server");
+        }
+      } catch (e) {
+        statusText.textContent = "Failed to start server.";
+        statusText.className = "text-[10px] font-bold text-red-500 mt-4 uppercase tracking-widest z-10";
+        btn.classList.remove('opacity-50', 'pointer-events-none');
+        btn.querySelector('span').textContent = 'Retry Initialization';
+        btn.querySelector('i').className = 'fa-solid fa-triangle-exclamation';
+      }
     }
 
     let cachedData = [];
@@ -672,21 +791,31 @@
     // Live Socket Architecture (Phase 3)
     function initWebSocket() {
       try {
-        const socket = io('http://localhost:3000');
-        socket.on('connect', () => {
-          socket.emit('join_tenant', 'public');
+        if (globalSocket && globalSocket.connected) return;
+        globalSocket = io('http://localhost:3000', { reconnectionAttempts: 3 });
+        
+        globalSocket.on('connect', () => {
+          globalSocket.emit('join_tenant', 'public');
           document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-bolt text-[#00ff88]"></i> Socket Connected`;
+          setButtonStateOnline();
         });
-        socket.on('new_score', (payload) => {
-           cachedData.push(payload);
-           renderLeaderboard(cachedData, false);
-           addHeatmapSpot();
-           if(payload.ai_debrief) {
-              showAIDebrief(payload.ai_debrief);
-           }
+        
+        globalSocket.on('new_score', (payload) => {
+          cachedData.push(payload);
+          renderLeaderboard(cachedData, false);
+          addHeatmapSpot();
+          if (payload.ai_debrief) {
+            showAIDebrief(payload.ai_debrief);
+          }
         });
-        socket.on('disconnect', () => {
-           document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Socket Disconnected`;
+        
+        globalSocket.on('disconnect', () => {
+          document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Socket Disconnected`;
+          setButtonStateOffline();
+        });
+        
+        globalSocket.on('connect_error', () => {
+           setButtonStateOffline();
         });
       } catch (e) {
         console.warn("WebSocket not available. Falling back to polling.");
@@ -698,7 +827,7 @@
       introAnimation();
       initChart();
       fetchData(true).then(() => {
-          initWebSocket();
+        initWebSocket();
       });
     });
   </script>
