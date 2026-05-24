@@ -152,6 +152,12 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    @keyframes shimmer {
+      100% {
+        transform: translateX(150%) skewX(-20deg);
+      }
+    }
+
     ::selection {
       background: #000;
       color: #fff;
@@ -316,20 +322,28 @@
 
   <!-- ═══ NAVBAR (Matching index.html) ═══ -->
   <nav class="navbar flex items-center justify-between" id="navbar">
-    <div class="flex items-center gap-4">
-      <a href="index.html" class="flex items-center gap-3 group">
-        <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-105 transition-transform"
-          style="filter: brightness(0);">
-        <span class="font-doto text-3xl font-bold tracking-wider text-black">medi<span
-            class="font-black">Crisis</span></span>
+    <div class="flex items-center gap-4 group cursor-pointer">
+      <a href="index.html" class="flex items-center gap-3 group-hover:opacity-90">
+        <img src="asserts/logo/mainLogo.svg" class="w-12 h-12 object-contain group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out" style="filter: brightness(0);">
+        <span class="font-doto text-3xl font-bold tracking-wider text-black opacity-90 group-hover:opacity-100 transition-opacity">medi<span class="font-black">Crisis</span></span>
       </a>
     </div>
-    <div class="hidden md:flex items-center gap-8 text-sm text-black/50 font-medium">
-      <a href="index.html" class="hover:text-black transition-colors">Home</a>
-      <a href="index.html#features" class="hover:text-black transition-colors">Features</a>
-      <a href="leaderboard.html" class="text-black font-semibold">Leaderboard</a>
-      <a href="index.html#cta" class="hover:text-black transition-colors">Play</a>
+    
+    <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
+      <a href="index.html" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+        <span class="relative z-10">Home</span>
+        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+      </a>
+      <a href="index.html#features" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+        <span class="relative z-10">Features</span>
+        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+      </a>
+      <a href="leaderboard.html" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black hover:text-black transition-colors group overflow-hidden rounded-full">
+        <span class="relative z-10">Leaderboard</span>
+        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+      </a>
     </div>
+
     <div class="flex items-center gap-4">
       <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
         <i class="fa-solid fa-users text-black/40"></i>
@@ -346,32 +360,32 @@
   <main class="relative z-10 flex-1 px-4 pt-28 pb-3 max-w-7xl mx-auto w-full flex flex-col overflow-hidden">
     <!-- Stats Bar -->
     <div id="statsBar" class="grid grid-cols-3 gap-3 mb-6">
-      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
-        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-trophy text-black/40 dark:text-white/40 mr-1"></i>Top Score</p>
-        <p id="topScore" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
+      <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 text-center border border-black/8 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-trophy text-black/40 mr-1"></i>Top Score</p>
+        <p id="topScore" class="stat-value text-2xl font-black text-black">—</p>
       </div>
-      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
-        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-bolt text-black/40 dark:text-white/40 mr-1"></i>Avg Integrity</p>
-        <p id="avgScore" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
+      <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 text-center border border-black/8 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-bolt text-black/40 mr-1"></i>Avg Integrity</p>
+        <p id="avgScore" class="stat-value text-2xl font-black text-black">—</p>
       </div>
-      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-4 text-center border border-black/8 dark:border-white/10 shadow-lg">
-        <p class="text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest mb-1"><i
-            class="fa-solid fa-check-double text-black/40 dark:text-white/40 mr-1"></i>Success Rate</p>
-        <p id="successRate" class="stat-value text-2xl font-black text-black dark:text-white">—</p>
+      <div class="backdrop-blur-md bg-white/60 rounded-2xl p-4 text-center border border-black/8 shadow-lg">
+        <p class="text-[0.65rem] text-black/60 uppercase tracking-widest mb-1"><i
+            class="fa-solid fa-check-double text-black/40 mr-1"></i>Success Rate</p>
+        <p id="successRate" class="stat-value text-2xl font-black text-black">—</p>
       </div>
     </div>
 
     <div class="flex-1 flex flex-col lg:flex-row gap-4 overflow-hidden">
       
       <!-- Leaderboard Panel -->
-      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 dark:border-white/10 shadow-lg w-full lg:w-1/2">
+      <div class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2">
         <!-- Column Headers -->
         <div
-          class="flex items-center px-5 py-3 text-[0.65rem] text-black/60 dark:text-white/60 uppercase tracking-widest font-bold border-b border-black/5 dark:border-white/5">
+          class="flex items-center px-5 py-3 text-[0.65rem] text-black/60 uppercase tracking-widest font-bold border-b border-black/5">
           <span class="w-14">Rank</span>
-          <span class="flex-1 ml-2">Surgeon (Elo Rank)</span>
+          <span class="flex-1 ml-2">Surgeon</span>
           <span class="w-20 text-center hidden sm:block">Integrity</span>
           <span class="w-24 text-center hidden sm:block">Duration</span>
           <span class="w-32 text-center">Status</span>
@@ -380,15 +394,15 @@
         <!-- Leaderboard (only this scrolls) -->
         <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
           <div id="emptyState" class="rounded-2xl p-12 text-center">
-            <i class="fa-solid fa-satellite-dish text-4xl text-black/30 dark:text-white/30 mb-4"></i>
-            <p class="text-black/60 dark:text-white/60 text-sm font-medium">Awaiting surgeon data feed…</p>
+            <i class="fa-solid fa-satellite-dish text-4xl text-black/30 mb-4"></i>
+            <p class="text-black/60 text-sm font-medium">Awaiting surgeon data feed…</p>
           </div>
         </div>
       </div>
 
       <!-- Analytics Dashboard (Phase 4) -->
-      <div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 dark:border-white/10 shadow-lg w-full lg:w-1/2 p-4">
-        <h3 class="text-xs text-black/60 dark:text-white/60 font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-chart-pie mr-2"></i>Enterprise Telemetry</h3>
+      <div class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2 p-4">
+        <h3 class="text-xs text-black/60 font-bold uppercase tracking-widest mb-4"><i class="fa-solid fa-chart-pie mr-2"></i>Enterprise Telemetry</h3>
         
         <!-- Time-Series Chart -->
         <div class="flex-1 relative mb-4">
@@ -396,9 +410,9 @@
         </div>
 
         <!-- Spatial Error Heatmap (Mocked overlay) -->
-        <div class="flex-1 relative rounded-xl border border-black/5 dark:border-white/5 overflow-hidden flex items-center justify-center bg-black/5 dark:bg-white/5" id="heatmap-container">
+        <div class="flex-1 relative rounded-xl border border-black/5 overflow-hidden flex items-center justify-center bg-black/5" id="heatmap-container">
             <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at center, transparent, rgba(0,0,0,0.1));"></div>
-            <p class="text-black/40 dark:text-white/40 text-xs font-bold uppercase tracking-widest z-10"><i class="fa-solid fa-map-location-dot mr-1"></i> Spatial Error Heatmap Active</p>
+            <p class="text-black/40 text-xs font-bold uppercase tracking-widest z-10"><i class="fa-solid fa-map-location-dot mr-1"></i> Spatial Error Heatmap Active</p>
             <!-- Generated heatmap spots -->
             <div id="heatmap-spots" class="absolute inset-0 w-full h-full pointer-events-none"></div>
         </div>
@@ -500,19 +514,12 @@
 
     function buildRow(player, index, isNew) {
       const score = player.integrity_score || 0;
-      
-      // Tiered Progression (Phase 4)
-      let eloRank = "Resident";
-      if (score >= 95) eloRank = "Chief Attending";
-      else if (score >= 80) eloRank = "Fellow";
-      else if (score >= 60) eloRank = "Senior Resident";
 
       return `
-  <div class="player-row backdrop-blur-md bg-white/60 dark:bg-black/60 border border-black/5 dark:border-white/5 rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
+  <div class="player-row backdrop-blur-md bg-white/60 border border-black/5 rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}">
     <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
     <div class="flex-1 min-w-0 ml-1">
-      <p class="font-bold text-sm text-black dark:text-white truncate">${player.player_name}</p>
-      <p class="text-[0.65rem] font-bold text-black/50 dark:text-white/50 tracking-wide">${eloRank}</p>
+      <p class="font-bold text-sm text-black truncate">${player.player_name}</p>
       <p class="text-[0.65rem] font-bold text-black/40 sm:hidden">${score}% • ${formatTime(player.duration_seconds)}</p>
     </div>
     <div class="score-ring hidden sm:flex">
@@ -520,7 +527,7 @@
       <span class="text-xs font-black stat-value" style="color:${scoreColor(score)}">${score}</span>
     </div>
     <div class="w-24 text-center hidden sm:block">
-      <span class="stat-value font-bold text-sm text-black/70 dark:text-white/70">${formatTime(player.duration_seconds)}</span>
+      <span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span>
     </div>
     <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`;
@@ -565,7 +572,7 @@
           maintainAspectRatio: false,
           scales: {
             y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' } },
-            x: { grid: { display: false } }
+            x: { grid: { display: false }, ticks: { display: false } }
           },
           plugins: {
             legend: { display: false }
@@ -653,7 +660,7 @@
           renderLeaderboard(cachedData, isInitial);
         } else if (isInitial) {
           document.getElementById('emptyState') && (document.getElementById('leaderboard').innerHTML =
-            `<div class="backdrop-blur-md bg-white/60 dark:bg-black/60 rounded-2xl p-12 text-center">
+            `<div class="backdrop-blur-md bg-white/60 rounded-2xl p-12 text-center">
           <i class="fa-solid fa-satellite-dish text-4xl text-black/20 block mb-4"></i>
           <p class="text-black/60 text-sm font-medium">No surgeons yet — waiting for first entry…</p></div>`);
         }

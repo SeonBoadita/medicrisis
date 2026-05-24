@@ -140,14 +140,13 @@ app.post('/api/telemetry', async (req, res) => {
 
         // D. Multi-Tenant Database Insert
         const hospitalId = decoded.hospitalId;
-        const query = "INSERT INTO leaderboard (player_name, integrity_score, duration_seconds, surgery_status, hospital_id, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO leaderboard (player_name, integrity_score, duration_seconds, surgery_status, hospital_id) VALUES (?, ?, ?, ?, ?)";
         await pool.query(query, [
             payload.player_name,
             payload.integrity_score,
             payload.duration_seconds,
             payload.surgery_status,
-            hospitalId,
-            decoded.deviceId
+            hospitalId
         ]);
 
         // E. Live Socket Broadcast
