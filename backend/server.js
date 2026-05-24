@@ -23,7 +23,11 @@ app.use(express.json({ limit: '100mb' }));
 // Configuration
 const SECRET_KEY = process.env.SECRET_KEY || 'vitalrush-super-secret-key';
 const JWT_SECRET = process.env.JWT_SECRET || 'vitalrush-jwt-secret';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+// The Architect's Sanitizer: Strips hidden Windows line breaks and literal quotes
+const rawGeminiKey = process.env.GEMINI_API_KEY || '';
+const GEMINI_API_KEY = rawGeminiKey.replace(/['"]/g, '').trim();
+
+console.log(`[SYS-CHECK] Raw Length: ${rawGeminiKey.length} | Sanitized Length: ${GEMINI_API_KEY.length}`);
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
 
 // Database Connection
@@ -81,8 +85,18 @@ initDB();
 async function generateDebrief(payload) {
     if (!GEMINI_API_KEY) return "AI Debrief unavailable (No API Key).";
     try {
+        // The Architect's Override: Force-feed the key to bypass dotenvx parsing failures
+        if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 10) {
+            throw new Error("CRITICAL: API Key is structurally invalid before hitting SDK.");
+        }
+
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // Explicitly pass the apiKey in the model config as a failsafe
+        const model = genAI.getGenerativeModel({
+            model: "gemini-2.5-flash",
+            // We are forcing the SDK to accept this string, ignoring its internal env check
+            apiKey: GEMINI_API_KEY
+        });
         const prompt = `You are an expert Chief Surgeon reviewing a VR medical simulation telemetry.
 Patient data: ${JSON.stringify(payload)}
 Generate a short, concise, custom conversational post-op review for this session. Use a clinical, direct tone. (Max 3 sentences).`;
@@ -99,7 +113,7 @@ Generate a short, concise, custom conversational post-op review for this session
 app.post('/api/auth', (req, res) => {
     const { deviceId, hospitalId } = req.body;
     if (!deviceId) return res.status(400).json({ error: "Missing deviceId" });
-    
+
     const token = jwt.sign({ deviceId, hospitalId: hospitalId || 'public' }, JWT_SECRET, { expiresIn: '2h' });
     res.json({ token });
 });
@@ -124,7 +138,7 @@ app.post('/api/telemetry', async (req, res) => {
         const clientHash = req.headers['x-signature'];
         const payloadString = JSON.stringify(payload);
         const serverHash = crypto.createHmac('sha256', SECRET_KEY).update(payloadString).digest('hex');
-        
+
         if (!clientHash || clientHash !== serverHash) {
             return res.status(403).json({ error: "Payload tamper detected. Signature mismatch." });
         }
@@ -168,7 +182,7 @@ app.get('/api/leaderboard', async (req, res) => {
         const hospitalId = req.query.hospital_id || 'public';
         let query = "SELECT player_name, integrity_score, duration_seconds, surgery_status FROM leaderboard ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100";
         let params = [];
-        
+
         // Multi-tenant isolation logic
         if (hospitalId !== 'public') {
             query = "SELECT player_name, integrity_score, duration_seconds, surgery_status FROM leaderboard WHERE hospital_id = ? ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100";
@@ -215,10 +229,26 @@ app.post('/api/evaluate-surgery', async (req, res) => {
             - Check: Always fail this state.
             - Instruction: "Surgical field reset. Reach out and firmly grasp the Scalpel with your virtual hand mesh to initiate Phase 1."
             `;
-        } else {
-            console.log(`MediCrisis Core: Engine reports tool is HELD [${currentState}]. Hard-locking AI to Alignment & Execution.`);
+        }
+        else if (currentState.includes("Phase4") || currentState.includes("Phase5") || currentState.includes("Phase7")) {
+            console.log(`MediCrisis Core: Engine reports Excision Phase [${currentState}]. Hard-locking AI to Scissor Protocol.`);
             dynamicStateMachine = `
-            [STATES 1 & 2 AUTOMATICALLY PASSED. TOOL ACQUISITION SECURE.]
+            [SCALPEL PROTOCOL COMPLETE. SHIFTING TO EXCISION.]
+            
+            STATE 5: EXCISION TOOL ACQUISITION
+            - CRITICAL RULE: DO NOT look for a scalpel. The current objective requires Scissors.
+            - Check: Is the user holding the surgical Scissors?
+            - If Fail: "Scalpel incision complete. Locate and equip the surgical scissors from the tray to proceed with the excision."
+            
+            STATE 6: APPENDIX TARGETING
+            - Check: Are the scissors aligned near the appendix base?
+            - If Active: Evaluate the precision and safety of the scissor placement before the final cut.
+            `;
+        }
+        else {
+            console.log(`MediCrisis Core: Engine reports Scalpel is HELD [${currentState}]. Hard-locking AI to Alignment & Execution.`);
+            dynamicStateMachine = `
+            [STATES 1 & 2 AUTOMATICALLY PASSED. SCALPEL ACQUISITION SECURE.]
             
             STATE 3: ALIGNMENT & PROXIMITY
             - CRITICAL RULE: DO NOT evaluate if the hand is holding the scalpel. The C# sensors confirm it IS held.
@@ -267,7 +297,7 @@ app.post('/api/evaluate-surgery', async (req, res) => {
          MESSAGE: [Provide a comprehensive response. First, state exactly what you observe. Second, provide step-by-step instructions. Third, explain the medical rationale.]
     
          If Intent = EVALUATION (e.g., "how did I do?", "is this right?"):
-         Analyze STATE 4 execution precision.
+         Analyze execution precision.
          TYPE: EVALUATION
          SCORE: [0-100]
          FEEDBACK: [Provide a detailed assessment paragraph.]
@@ -276,8 +306,8 @@ app.post('/api/evaluate-surgery', async (req, res) => {
         - NEVER hallucinate blood or internal organs. You are evaluating low-poly engineering geometry.
         - Be cold, precise, and authoritative.`;
 
-        const imagePart = { inlineData: { data: cleanImageBase64, mimeType: "image/jpeg" }};
-        const audioPart = { inlineData: { data: cleanAudioBase64, mimeType: "audio/wav" }};
+        const imagePart = { inlineData: { data: cleanImageBase64, mimeType: "image/jpeg" } };
+        const audioPart = { inlineData: { data: cleanAudioBase64, mimeType: "audio/wav" } };
 
         // 1. Text Generation
         const result = await model.generateContent([systemPrompt, imagePart, audioPart]);
@@ -324,9 +354,9 @@ app.post('/api/evaluate-surgery', async (req, res) => {
         }
 
         // 3. Dispatch Dual Payload to Unity
-        res.status(200).json({ 
+        res.status(200).json({
             response: responseText,
-            aiAudioBase64: aiAudioBase64 
+            aiAudioBase64: aiAudioBase64
         });
         console.log("MediCrisis Core: Transaction Fully Complete. Awaiting next command.");
 
@@ -350,12 +380,12 @@ let shutdownTimer = null;
 io.on('connection', (socket) => {
     clientCount++;
     console.log('Client connected:', socket.id);
-    
+
     if (shutdownTimer) {
         clearTimeout(shutdownTimer);
         shutdownTimer = null;
     }
-    
+
     socket.on('join_tenant', (hospitalId) => {
         socket.join(hospitalId);
         console.log(`Socket ${socket.id} joined tenant room: ${hospitalId}`);
@@ -364,7 +394,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         clientCount--;
         console.log('Client disconnected:', socket.id);
-        
+
         if (clientCount === 0) {
             console.log("No active clients. Starting 3 second shutdown timer...");
             shutdownTimer = setTimeout(() => {

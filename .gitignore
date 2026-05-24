@@ -1,1 +1,5 @@
+# Security
 .env
+
+# Dependencies
+node_modules/
