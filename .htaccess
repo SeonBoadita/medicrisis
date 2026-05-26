@@ -21,4 +21,5 @@ RewriteRule ^ - [F,L]
 RewriteCond %{REQUEST_URI} \.php$
 RewriteCond %{REQUEST_URI} !/api\.php$
 RewriteCond %{REQUEST_URI} !/start_server\.php$
+RewriteCond %{REQUEST_URI} !/stop_server\.php$
 RewriteRule ^ - [F,L]

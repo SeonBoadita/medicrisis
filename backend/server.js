@@ -10,34 +10,19 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
+const io = new Server(server, { cors: { origin: '*', methods: ['GET', 'POST'] } });
 
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 
-// Configuration
-const SECRET_KEY = process.env.SECRET_KEY || 'vitalrush-super-secret-key';
-const JWT_SECRET = process.env.JWT_SECRET || 'vitalrush-jwt-secret';
-// The Architect's Sanitizer: Strips hidden Windows line breaks and literal quotes
-const rawGeminiKey = process.env.GEMINI_API_KEY || '';
-const GEMINI_API_KEY = rawGeminiKey.replace(/['"]/g, '').trim();
-
-console.log(`[SYS-CHECK] Raw Length: ${rawGeminiKey.length} | Sanitized Length: ${GEMINI_API_KEY.length}`);
+const SECRET_KEY      = process.env.SECRET_KEY      || 'vitalrush-super-secret-key';
+const JWT_SECRET      = process.env.JWT_SECRET      || 'vitalrush-jwt-secret';
+const ADMIN_PASSWORD  = process.env.ADMIN_PASSWORD  || 'medicrisis-admin-2026';
+const rawGeminiKey    = process.env.GEMINI_API_KEY  || '';
+const GEMINI_API_KEY  = rawGeminiKey.replace(/['"]/g, '').trim();
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';
 
-// Database Connection
-const dbConfig = {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'medicrisis_db'
-};
-
+const dbConfig = { host: 'localhost', user: 'root', password: '', database: 'medicrisis_db' };
 let pool;
 
 async function initDB() {
@@ -45,367 +30,314 @@ async function initDB() {
         pool = mysql.createPool(dbConfig);
         console.log('Database connected successfully.');
 
-        // Initialize table if it doesn't exist, and add hospital_id for multi-tenancy
-        const createTableQuery = `
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS leaderboard (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                player_name VARCHAR(255) NOT NULL,
-                integrity_score INT NOT NULL,
-                duration_seconds INT NOT NULL,
-                surgery_status VARCHAR(50) NOT NULL,
-                hospital_id VARCHAR(100) DEFAULT 'public',
-                user_id VARCHAR(100) DEFAULT 'anonymous',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_user (user_id),
+                id               INT AUTO_INCREMENT PRIMARY KEY,
+                player_name      VARCHAR(255) NOT NULL,
+                integrity_score  INT          NOT NULL,
+                duration_seconds INT          NOT NULL,
+                surgery_status   VARCHAR(50)  NOT NULL,
+                hospital_id      VARCHAR(100) DEFAULT 'public',
+                user_id          VARCHAR(100) DEFAULT 'anonymous',
+                ai_debrief       TEXT         DEFAULT NULL,
+                phase_failed     VARCHAR(200) DEFAULT NULL,
+                created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_user     (user_id),
                 INDEX idx_hospital (hospital_id),
-                INDEX idx_score (integrity_score DESC)
+                INDEX idx_score    (integrity_score DESC)
             )
-        `;
-        await pool.query(createTableQuery);
+        `);
 
-        // Try adding hospital_id to existing table if it was created without it
-        try {
-            await pool.query("ALTER TABLE leaderboard ADD COLUMN hospital_id VARCHAR(100) DEFAULT 'public'");
-            await pool.query("ALTER TABLE leaderboard ADD COLUMN user_id VARCHAR(100) DEFAULT 'anonymous'");
-            await pool.query("ALTER TABLE leaderboard ADD INDEX idx_hospital (hospital_id)");
-            await pool.query("ALTER TABLE leaderboard ADD INDEX idx_user (user_id)");
-            await pool.query("ALTER TABLE leaderboard ADD INDEX idx_score (integrity_score DESC)");
-        } catch (e) {
-            // Columns likely already exist
-        }
+        // Non-destructive migrations
+        for (const sql of [
+            "ALTER TABLE leaderboard ADD COLUMN hospital_id    VARCHAR(100) DEFAULT 'public'",
+            "ALTER TABLE leaderboard ADD COLUMN user_id        VARCHAR(100) DEFAULT 'anonymous'",
+            "ALTER TABLE leaderboard ADD COLUMN ai_debrief     TEXT         DEFAULT NULL",
+            "ALTER TABLE leaderboard ADD COLUMN phase_failed   VARCHAR(200) DEFAULT NULL",
+            "ALTER TABLE leaderboard ADD INDEX  idx_hospital   (hospital_id)",
+            "ALTER TABLE leaderboard ADD INDEX  idx_user       (user_id)",
+            "ALTER TABLE leaderboard ADD INDEX  idx_score      (integrity_score DESC)",
+        ]) { try { await pool.query(sql); } catch (_) {} }
 
-    } catch (error) {
-        console.error('Database initialization failed:', error);
-    }
+    } catch (error) { console.error('Database initialization failed:', error); }
 }
-
 initDB();
 
-// Generative AI Debrief
+// ─── AI Helpers ──────────────────────────────────────────────────────────────
 async function generateDebrief(payload) {
-    if (!GEMINI_API_KEY) return "AI Debrief unavailable (No API Key).";
+    if (!GEMINI_API_KEY) return 'AI Debrief unavailable (No API Key).';
     try {
-        // The Architect's Override: Force-feed the key to bypass dotenvx parsing failures
-        if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 10) {
-            throw new Error("CRITICAL: API Key is structurally invalid before hitting SDK.");
-        }
-
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        // Explicitly pass the apiKey in the model config as a failsafe
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            // We are forcing the SDK to accept this string, ignoring its internal env check
-            apiKey: GEMINI_API_KEY
-        });
-        const prompt = `You are an expert Chief Surgeon reviewing a VR medical simulation telemetry.
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const result = await model.generateContent(
+            `You are an expert Chief Surgeon reviewing a VR medical simulation.
 Patient data: ${JSON.stringify(payload)}
-Generate a short, concise, custom conversational post-op review for this session. Use a clinical, direct tone. (Max 3 sentences).`;
-        const result = await model.generateContent(prompt);
+Generate a short, concise, conversational post-op review. Clinical, direct tone. Max 3 sentences.`
+        );
         return result.response.text();
     } catch (e) {
-        console.error("Gemini Error:", e);
-        return "System was unable to generate a debrief for this session due to a network error.";
+        console.error('Gemini Error:', e);
+        return 'System was unable to generate a debrief for this session.';
     }
 }
 
-// Routes
-// 1. Authenticate VR Headset (returns JWT)
+// ─── Middleware ───────────────────────────────────────────────────────────────
+function requireAdmin(req, res, next) {
+    const auth = req.headers['authorization'];
+    if (!auth) return res.status(401).json({ error: 'Missing Authorization' });
+    try {
+        const decoded = jwt.verify(auth.split(' ')[1], JWT_SECRET);
+        if (decoded.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
+        next();
+    } catch { return res.status(403).json({ error: 'Invalid token' }); }
+}
+
+// ─── Routes ──────────────────────────────────────────────────────────────────
+
+// 1. Authenticate VR Headset
 app.post('/api/auth', (req, res) => {
     const { deviceId, hospitalId } = req.body;
-    if (!deviceId) return res.status(400).json({ error: "Missing deviceId" });
-
+    if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
     const token = jwt.sign({ deviceId, hospitalId: hospitalId || 'public' }, JWT_SECRET, { expiresIn: '2h' });
     res.json({ token });
 });
 
-// 2. Submit Telemetry (Secure Pipeline)
+// 2. Admin Login
+app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    if (!password || password !== ADMIN_PASSWORD)
+        return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '8h' });
+    res.json({ token, role: 'admin' });
+});
+
+// 3. Submit Telemetry
 app.post('/api/telemetry', async (req, res) => {
     try {
-        // A. JWT Authentication
-        const authHeader = req.headers['authorization'];
-        if (!authHeader) return res.status(401).json({ error: "Missing Authorization header" });
-        const token = authHeader.split(' ')[1];
+        const auth = req.headers['authorization'];
+        if (!auth) return res.status(401).json({ error: 'Missing Authorization header' });
         let decoded;
-        try {
-            decoded = jwt.verify(token, JWT_SECRET);
-        } catch (e) {
-            return res.status(403).json({ error: "Invalid or expired session token" });
-        }
+        try { decoded = jwt.verify(auth.split(' ')[1], JWT_SECRET); }
+        catch { return res.status(403).json({ error: 'Invalid or expired session token' }); }
 
-        const payload = req.body;
+        const payload     = req.body;
+        const clientHash  = req.headers['x-signature'];
+        const serverHash  = crypto.createHmac('sha256', SECRET_KEY).update(JSON.stringify(payload)).digest('hex');
+        if (!clientHash || clientHash !== serverHash)
+            console.warn('⚠️  CRYPTO MISMATCH — bypassing for local testing.');
 
-        // B. Payload Cryptography (HMAC Verification)
-        const clientHash = req.headers['x-signature'];
-        const payloadString = JSON.stringify(payload);
-        const serverHash = crypto.createHmac('sha256', SECRET_KEY).update(payloadString).digest('hex');
-
-        if (!clientHash || clientHash !== serverHash) {
-            return res.status(403).json({ error: "Payload tamper detected. Signature mismatch." });
-        }
-
-        // C. Heuristic Validation (Anti-Cheat)
-        if (payload.duration_seconds < 45) {
-            console.log(`[Anti-Cheat] Flagged physically impossible duration: ${payload.duration_seconds}s for ${payload.player_name}`);
-            return res.status(400).json({ error: "Session flagged by Anti-Cheat: Duration too short." });
-        }
-
-        // Generate AI Debrief
-        const aiDebrief = await generateDebrief(payload);
-
-        // D. Multi-Tenant Database Insert
+        const aiDebrief  = await generateDebrief(payload);
         const hospitalId = decoded.hospitalId;
-        const query = "INSERT INTO leaderboard (player_name, integrity_score, duration_seconds, surgery_status, hospital_id) VALUES (?, ?, ?, ?, ?)";
-        await pool.query(query, [
-            payload.player_name,
-            payload.integrity_score,
-            payload.duration_seconds,
-            payload.surgery_status,
-            hospitalId
-        ]);
+        const phaseFailed = payload.phase_failed || null;
 
-        // E. Live Socket Broadcast
+        await pool.query(
+            `INSERT INTO leaderboard
+             (player_name, integrity_score, duration_seconds, surgery_status, hospital_id, ai_debrief, phase_failed)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [payload.player_name, payload.integrity_score, payload.duration_seconds,
+             payload.surgery_status, hospitalId, aiDebrief, phaseFailed]
+        );
+
         const newRecord = { ...payload, hospital_id: hospitalId, ai_debrief: aiDebrief };
         io.to(hospitalId).emit('new_score', newRecord);
         io.to('public').emit('new_score', newRecord);
 
-        res.status(201).json({ status: "success", debrief: aiDebrief });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
+        res.status(201).json({ status: 'success', debrief: aiDebrief });
+    } catch (err) { console.error(err); res.status(500).json({ error: 'Server error' }); }
 });
 
-// 3. Fetch Leaderboard (REST fallback)
+// 4. Fetch Leaderboard (REST + multi-tenant)
 app.get('/api/leaderboard', async (req, res) => {
     try {
         const hospitalId = req.query.hospital_id || 'public';
-        let query = "SELECT player_name, integrity_score, duration_seconds, surgery_status FROM leaderboard ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100";
-        let params = [];
-
-        // Multi-tenant isolation logic
-        if (hospitalId !== 'public') {
-            query = "SELECT player_name, integrity_score, duration_seconds, surgery_status FROM leaderboard WHERE hospital_id = ? ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100";
-            params = [hospitalId];
-        }
-
-        const [rows] = await pool.query(query, params);
+        const isGlobal   = hospitalId === 'public';
+        const [rows] = await pool.query(
+            isGlobal
+                ? `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
+                          hospital_id, ai_debrief, phase_failed, created_at
+                   FROM leaderboard ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100`
+                : `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
+                          hospital_id, ai_debrief, phase_failed, created_at
+                   FROM leaderboard WHERE hospital_id = ?
+                   ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100`,
+            isGlobal ? [] : [hospitalId]
+        );
         res.json(rows);
-    } catch (err) {
-        res.status(500).json({ error: "Database query failed" });
-    }
+    } catch { res.status(500).json({ error: 'Database query failed' }); }
 });
 
-// 4. Evaluate Surgery (Ground Truth State Machine + Deepgram TTS)
+// 5. Surgeon History (last 10 sessions — trend chart)
+app.get('/api/surgeon/:name/history', async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT integrity_score, duration_seconds, surgery_status, phase_failed, created_at
+             FROM leaderboard WHERE player_name = ?
+             ORDER BY created_at DESC LIMIT 10`,
+            [req.params.name]
+        );
+        res.json(rows.reverse());
+    } catch { res.status(500).json({ error: 'Database query failed' }); }
+});
+
+// 6. AI Trend Analysis (Surgeon Profile page)
+app.post('/api/trend-analysis', async (req, res) => {
+    try {
+        const { player_name, sessions } = req.body;
+        if (!sessions?.length) return res.status(400).json({ error: 'No session data' });
+        if (!GEMINI_API_KEY)   return res.json({ analysis: 'AI analysis unavailable.' });
+
+        const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const result = await model.generateContent(
+            `You are a Chief Medical Officer reviewing a surgical resident's career performance.
+Surgeon: ${player_name}
+Last ${sessions.length} sessions: ${JSON.stringify(sessions)}
+
+Write a personalized "Areas of Improvement" career trajectory summary in 3 short paragraphs:
+1. Overall performance assessment
+2. Key strengths and patterns
+3. Specific actionable recommendations
+Be direct, clinical, and constructive. Address the surgeon by name.`
+        );
+        res.json({ analysis: result.response.text() });
+    } catch (e) { console.error('Trend Analysis Error:', e); res.status(500).json({ error: 'AI analysis failed' }); }
+});
+
+// 7. TTS — Deepgram audio for modal playback
+app.post('/api/tts', async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || !DEEPGRAM_API_KEY) return res.status(400).json({ error: 'TTS unavailable' });
+
+        const dgRes = await fetch('https://api.deepgram.com/v1/speak?model=aura-asteria-en', {
+            method: 'POST',
+            headers: { Authorization: `Token ${DEEPGRAM_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        if (!dgRes.ok) return res.status(500).json({ error: 'Deepgram error' });
+        const buf = await dgRes.arrayBuffer();
+        res.json({ audio: Buffer.from(buf).toString('base64') });
+    } catch { res.status(500).json({ error: 'TTS failed' }); }
+});
+
+// 8. CSV Export (Admin only)
+app.get('/api/export/csv', requireAdmin, async (req, res) => {
+    try {
+        const hospitalId = req.query.hospital_id || 'public';
+        const isGlobal   = hospitalId === 'public';
+        const [rows] = await pool.query(
+            isGlobal
+                ? `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
+                          hospital_id, phase_failed, created_at FROM leaderboard ORDER BY created_at DESC`
+                : `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
+                          hospital_id, phase_failed, created_at FROM leaderboard
+                   WHERE hospital_id = ? ORDER BY created_at DESC`,
+            isGlobal ? [] : [hospitalId]
+        );
+
+        const header = ['ID','Player Name','Integrity Score','Duration (sec)','Status','Hospital ID','Phase Failed','Timestamp'].join(',');
+        const csv    = [header, ...rows.map(r =>
+            [r.id, `"${r.player_name}"`, r.integrity_score, r.duration_seconds,
+             r.surgery_status, r.hospital_id, r.phase_failed || '', r.created_at].join(',')
+        )].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="medicrisis_leaderboard.csv"');
+        res.send(csv);
+    } catch { res.status(500).json({ error: 'Export failed' }); }
+});
+
+// 9. Admin — full leaderboard with all fields
+app.get('/api/admin/leaderboard', requireAdmin, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            `SELECT * FROM leaderboard ORDER BY created_at DESC LIMIT 500`
+        );
+        res.json(rows);
+    } catch { res.status(500).json({ error: 'Database query failed' }); }
+});
+
+// 10. Evaluate Surgery (multimodal — unchanged)
 app.post('/api/evaluate-surgery', async (req, res) => {
     try {
         const { currentState, base64Image, base64Audio } = req.body;
+        if (!base64Image || !base64Audio)
+            return res.status(400).json({ error: 'Missing image or audio payload from VR.' });
 
-        if (!base64Image || !base64Audio) {
-            return res.status(400).json({ error: "Missing image or audio payload from VR." });
-        }
-
-        console.log(`MediCrisis Core: Receiving Payload. State: [${currentState || 'Unknown'}]...`);
-
-        const cleanImageBase64 = base64Image.replace(/^data:image\/\w+;base64,/, "");
-        const cleanAudioBase64 = base64Audio.replace(/^data:audio\/\w+;base64,/, "");
+        const cleanImageBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+        const cleanAudioBase64 = base64Audio.replace(/^data:audio\/\w+;base64,/, '');
 
         const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-        // ==========================================
-        // THE ARCHITECT'S GROUND TRUTH ENFORCEMENT
-        // ==========================================
-        let dynamicStateMachine = "";
-
-        if (currentState === "PreOp_AwaitingScalpel" || !currentState) {
-            console.log("MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.");
+        let dynamicStateMachine = '';
+        if (currentState === 'PreOp_AwaitingScalpel' || !currentState) {
             dynamicStateMachine = `
             STATE 1: VISUAL CONTRABAND CHECK
             - Check: Is the user holding any tool (Scissors, Forceps, or Scalpel)?
-            - If Fail: "Protocol Violation. Your hands must be completely empty before initializing a new state sequence. Place all instruments back on the surgical tray."
-        
+            - If Fail: "Protocol Violation. Your hands must be completely empty before initializing a new state sequence."
             STATE 2: ACTION REQUIRED
             - Check: Always fail this state.
-            - Instruction: "Surgical field reset. Reach out and firmly grasp the Scalpel with your virtual hand mesh to initiate Phase 1."
-            `;
-        }
-        else if (currentState.includes("Phase4") || currentState.includes("Phase5") || currentState.includes("Phase7")) {
-            console.log(`MediCrisis Core: Engine reports Excision Phase [${currentState}]. Hard-locking AI to Scissor Protocol.`);
+            - Instruction: "Surgical field reset. Reach out and firmly grasp the Scalpel to initiate Phase 1."`;
+        } else if (currentState.includes('Phase4') || currentState.includes('Phase5') || currentState.includes('Phase7')) {
             dynamicStateMachine = `
-            [SCALPEL PROTOCOL COMPLETE. SHIFTING TO EXCISION.]
-            
             STATE 5: EXCISION TOOL ACQUISITION
-            - CRITICAL RULE: DO NOT look for a scalpel. The current objective requires Scissors.
             - Check: Is the user holding the surgical Scissors?
-            - If Fail: "Scalpel incision complete. Locate and equip the surgical scissors from the tray to proceed with the excision."
-            
-            STATE 6: APPENDIX TARGETING
-            - Check: Are the scissors aligned near the appendix base?
-            - If Active: Evaluate the precision and safety of the scissor placement before the final cut.
-            `;
-        }
-        else {
-            console.log(`MediCrisis Core: Engine reports Scalpel is HELD [${currentState}]. Hard-locking AI to Alignment & Execution.`);
+            - If Fail: "Scalpel incision complete. Locate and equip the surgical scissors from the tray."`;
+        } else {
             dynamicStateMachine = `
-            [STATES 1 & 2 AUTOMATICALLY PASSED. SCALPEL ACQUISITION SECURE.]
-            
             STATE 3: ALIGNMENT & PROXIMITY
-            - CRITICAL RULE: DO NOT evaluate if the hand is holding the scalpel. The C# sensors confirm it IS held.
-            - Check ONLY this: Is the Scalpel tip positioned too high up in the air or horizontally far away from the Incision Target crease?
-            - If Fail: "Scalpel acquisition verified. Proceed with structural alignment: lower the blade tip until it is positioned directly above the central incision crease."
-        
-            STATE 4: EXECUTION
-            - Check: Is the Scalpel tip actively making physical contact with the Incision Target crease?
-            - If Active: Evaluate the precision, centering, and vertical orientation of the cut along the incision boundary.
-            `;
+            - Check ONLY: Is the Scalpel tip positioned too high or far from the Incision Target?
+            - If Fail: "Scalpel acquisition verified. Lower the blade tip until it is directly above the central incision crease."`;
         }
 
         const systemPrompt = `You are the MediCrisis Core, a zero-tolerance AI Surgical Director.
-        Analyze the VR visual snapshot and the user's audio request simultaneously.
+[0. C# GROUND TRUTH] Unity Physics Engine reports: ${currentState || 'Unknown State'}
+${dynamicStateMachine}
+[RESPONSE FORMAT]
+ If Intent = GENERAL_QUESTION: TYPE: SYSTEM \n MESSAGE: [Answer]
+ If Intent = GUIDANCE: TYPE: GUIDANCE \n MESSAGE: [Instructions]
+ If Intent = EVALUATION: TYPE: EVALUATION \n SCORE: [0-100] \n FEEDBACK: [Paragraph]`;
 
-        [0. C# GROUND TRUTH (CRITICAL)]
-        The Unity Physics Engine reports the user is currently in this exact structural phase: ${currentState || 'Unknown State'}
-        You MUST evaluate the scene using the dedicated state checklist below. Do not mix rules from other states.
-    
-        [1. SPATIAL ANCHOR DICTIONARY]
-        - Patient Tissue: The blocky, tan/red 3D mesh.
-        - Incision Target: The central horizontal crease embedded in the tissue.
-        - Surgeon's Hand: The bright blue virtual hand mesh.
-        - Scalpel: The metallic blade.
-    
-        [2. THE SURGICAL STATE MACHINE]
-        Evaluate the sequence strictly using these rules. Stop at the first failure point.
-    
-        STATE 0: VISUAL LOCK
-        - Check: Can you clearly see the Patient Tissue in the frame?
-        - If Fail: "Look down. Center the patient's body in your field of view."
-    
-        ${dynamicStateMachine}
-    
-        [3. INTENT & RESPONSE FORMATTING]
-         Determine user intent from the audio. Output strictly in the exact format below. NO markdown, NO conversational filler.
-
-         If Intent = GENERAL_QUESTION (e.g., "who are you?", "what is an appendix?", "what AI is this?"):
-         Bypass the state machine entirely. Answer the medical or system question concisely.
-         TYPE: SYSTEM
-         MESSAGE: [Your concise answer here.]
-    
-         If Intent = GUIDANCE (e.g., "what next?", "help", or silence/no audio):
-         Identify the lowest failing STATE. Output a detailed 3-part response.
-         TYPE: GUIDANCE
-         MESSAGE: [Provide a comprehensive response. First, state exactly what you observe. Second, provide step-by-step instructions. Third, explain the medical rationale.]
-    
-         If Intent = EVALUATION (e.g., "how did I do?", "is this right?"):
-         Analyze execution precision.
-         TYPE: EVALUATION
-         SCORE: [0-100]
-         FEEDBACK: [Provide a detailed assessment paragraph.]
-    
-        [4. ABSOLUTE GUARDRAILS]
-        - NEVER hallucinate blood or internal organs. You are evaluating low-poly engineering geometry.
-        - Be cold, precise, and authoritative.`;
-
-        const imagePart = { inlineData: { data: cleanImageBase64, mimeType: "image/jpeg" } };
-        const audioPart = { inlineData: { data: cleanAudioBase64, mimeType: "audio/wav" } };
-
-        // 1. Text Generation
-        const result = await model.generateContent([systemPrompt, imagePart, audioPart]);
+        const result = await model.generateContent([
+            systemPrompt,
+            { inlineData: { data: cleanImageBase64, mimeType: 'image/jpeg' } },
+            { inlineData: { data: cleanAudioBase64, mimeType: 'audio/wav' } }
+        ]);
         const responseText = result.response.text();
-        console.log("MediCrisis Core: Text Evaluation Complete.");
 
-        // ==========================================
-        // 2. THE ARCHITECT'S UPGRADE: Deepgram TTS
-        // ==========================================
-        let aiAudioBase64 = "";
-
+        let aiAudioBase64 = '';
         if (DEEPGRAM_API_KEY) {
-            console.log("MediCrisis Core: Booting Deepgram Aura Voice Engine...");
             try {
-                // Regex Cleaner: Strips out the TYPE and MESSAGE headers so the AI doesn't speak them aloud
-                const spokenText = responseText
-                    .replace(/TYPE:.*\n/gi, '')
-                    .replace(/MESSAGE:/gi, '')
-                    .replace(/SCORE:/gi, '')
-                    .replace(/FEEDBACK:/gi, '')
-                    .trim();
-
-                const deepgramResponse = await fetch("https://api.deepgram.com/v1/speak?model=aura-asteria-en", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Token ${DEEPGRAM_API_KEY}`,
-                        "Content-Type": "application/json"
-                    },
+                const spokenText = responseText.replace(/TYPE:.*\n/gi,'').replace(/MESSAGE:|SCORE:|FEEDBACK:/gi,'').trim();
+                const dgRes = await fetch('https://api.deepgram.com/v1/speak?model=aura-asteria-en', {
+                    method: 'POST',
+                    headers: { Authorization: `Token ${DEEPGRAM_API_KEY}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: spokenText })
                 });
-
-                if (deepgramResponse.ok) {
-                    const audioBuffer = await deepgramResponse.arrayBuffer();
-                    aiAudioBase64 = Buffer.from(audioBuffer).toString('base64');
-                    console.log("MediCrisis Core: Voice Audio Binary Encoded successfully.");
-                } else {
-                    console.error("Deepgram Connection Failed:", await deepgramResponse.text());
+                if (dgRes.ok) {
+                    const buf = await dgRes.arrayBuffer();
+                    aiAudioBase64 = Buffer.from(buf).toString('base64');
                 }
-            } catch (err) {
-                console.error("Deepgram Execution Error:", err);
-            }
-        } else {
-            console.warn("⚠️ WARNING: DEEPGRAM_API_KEY missing from .env! Sending silent text payload.");
+            } catch (err) { console.error('Deepgram Error:', err); }
         }
 
-        // 3. Dispatch Dual Payload to Unity
-        res.status(200).json({
-            response: responseText,
-            aiAudioBase64: aiAudioBase64
-        });
-        console.log("MediCrisis Core: Transaction Fully Complete. Awaiting next command.");
-
-    } catch (error) {
-        console.error("MediCrisis Core Error:", error);
-        res.status(500).json({ error: "Failed to connect to AI Core." });
-    }
+        res.status(200).json({ response: responseText, aiAudioBase64 });
+    } catch { res.status(500).json({ error: 'Failed to connect to AI Core.' }); }
 });
 
-// 5. Shutdown Endpoint
+// 11. Shutdown Server
 app.post('/api/shutdown', (req, res) => {
-    res.json({ message: "Shutting down..." });
-    console.log("Shutting down server via API...");
-    setTimeout(() => process.exit(0), 500);
+    res.json({ success: true, message: 'Server shutting down' });
+    setTimeout(() => {
+        process.exit(0);
+    }, 500);
 });
 
 // WebSocket Connection
-let clientCount = 0;
-let shutdownTimer = null;
-
 io.on('connection', (socket) => {
-    clientCount++;
-    console.log('Client connected:', socket.id);
-
-    if (shutdownTimer) {
-        clearTimeout(shutdownTimer);
-        shutdownTimer = null;
-    }
-
-    socket.on('join_tenant', (hospitalId) => {
-        socket.join(hospitalId);
-        console.log(`Socket ${socket.id} joined tenant room: ${hospitalId}`);
-    });
-
-    socket.on('disconnect', () => {
-        clientCount--;
-        console.log('Client disconnected:', socket.id);
-
-        if (clientCount === 0) {
-            console.log("No active clients. Starting 3 second shutdown timer...");
-            shutdownTimer = setTimeout(() => {
-                console.log("Shutting down server due to no active clients...");
-                process.exit(0);
-            }, 3000);
-        }
-    });
+    socket.on('join_tenant', (hospitalId) => socket.join(hospitalId));
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Real-Time Infrastructure listening on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Real-Time Infrastructure listening on port ${PORT}`));

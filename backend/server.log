@@ -1,27 +1,3 @@
-◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
-[SYS-CHECK] Raw Length: 39 | Sanitized Length: 39
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
 Database connected successfully.
 Real-Time Infrastructure listening on port 3000
-Client connected: 0DdIXdawGxWKo1HhAAAB
-Socket 0DdIXdawGxWKo1HhAAAB joined tenant room: public
-MediCrisis Core: Receiving Payload. State: [PreOp_AwaitingScalpel]...
-MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.
-MediCrisis Core: Text Evaluation Complete.
-MediCrisis Core: Booting Deepgram Aura Voice Engine...
-MediCrisis Core: Voice Audio Binary Encoded successfully.
-MediCrisis Core: Transaction Fully Complete. Awaiting next command.
-MediCrisis Core: Receiving Payload. State: [PreOp_AwaitingScalpel]...
-MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.
-MediCrisis Core: Text Evaluation Complete.
-MediCrisis Core: Booting Deepgram Aura Voice Engine...
-MediCrisis Core: Voice Audio Binary Encoded successfully.
-MediCrisis Core: Transaction Fully Complete. Awaiting next command.
-MediCrisis Core: Receiving Payload. State: [PreOp_AwaitingScalpel]...
-MediCrisis Core: Engine reports tool is DROPPED. Hard-locking AI to Pre-Op Evaluation.
-MediCrisis Core: Text Evaluation Complete.
-MediCrisis Core: Booting Deepgram Aura Voice Engine...
-MediCrisis Core: Voice Audio Binary Encoded successfully.
-MediCrisis Core: Transaction Fully Complete. Awaiting next command.
-Shutting down server via API...
-Client disconnected: 0DdIXdawGxWKo1HhAAAB
-No active clients. Starting 3 second shutdown timer...

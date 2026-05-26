@@ -245,6 +245,16 @@
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    .nav-link.active span.relative {
+      color: #000 !important;
+      font-weight: 900;
+    }
+    .nav-link.active div.absolute {
+      transform: translateY(0) !important;
+      background-color: #fff !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
     /* Feature card hover */
     .feature-card {
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
@@ -446,16 +456,16 @@
     </div>
     
     <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-      <a href="#hero" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+      <a href="#hero" id="nav-home" class="nav-link active relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10">Home</span>
         <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
       </a>
-      <a href="#features" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
-        <span class="relative z-10">Features</span>
+      <a href="leaderboard.html" id="nav-leaderboard" class="nav-link relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+        <span class="relative z-10">Leaderboard</span>
         <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
       </a>
-      <a href="leaderboard.html" class="relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
-        <span class="relative z-10">Leaderboard</span>
+      <a href="admin.html" id="nav-admin" class="nav-link relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
+        <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
         <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
       </a>
     </div>

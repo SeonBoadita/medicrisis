@@ -1,10 +1,8 @@
 <?php
-// Architect Note: This file strictly handles the secure pipeline to MySQL.
 $host = "localhost";
 $db_name = "medicrisis_db";
 $username = "root"; 
-$password = ""; // Leave empty if default XAMPP
-
+$password = ""; 
 try {
     $conn = new PDO("mysql:host=" . $host . ";dbname=" . $db_name, $username, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

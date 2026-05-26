@@ -274,6 +274,18 @@ function initScrollAnimations() {
 
   ScrollTrigger.create({ start: 80, onUpdate: s => { document.getElementById('navbar').classList.toggle('scrolled', s.scroll() > 80) } });
 
+  ScrollTrigger.create({
+    trigger: '#hero',
+    start: 'top center',
+    end: 'bottom center',
+    onToggle: self => {
+      if (self.isActive) {
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        document.getElementById('nav-home')?.classList.add('active');
+      }
+    }
+  });
+
   // Elastic Magnetic Buttons
   document.querySelectorAll('.magnetic-btn').forEach(btn => {
     btn.addEventListener('mousemove', e => {
