@@ -3,3 +3,9 @@
 
 # Dependencies
 node_modules/
+
+# Ignore user-uploaded profile images
+frontend/assets/logo/images/profile/*
+
+# Optional: Keep the directory structure in Git but ignore the files inside
+!frontend/assets/logo/images/profile/.gitkeep
