@@ -516,54 +516,17 @@
     <div class="brackets"></div>
   </div>
 
-  <!-- ═══ NAVBAR (Matching index.html) ═══ -->
-  <nav class="navbar flex items-center justify-between" id="navbar">
-    <div class="flex items-center gap-4 group cursor-pointer">
-      <a href="index.html" class="flex items-center gap-3 group-hover:opacity-90">
-        <img src="assets/logo/mainLogo.svg"
-          class="w-12 h-12 object-contain group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 ease-out"
-          style="filter: brightness(0);">
-        <span
-          class="font-doto text-3xl font-bold tracking-wider text-black opacity-90 group-hover:opacity-100 transition-opacity">medi<span
-            class="font-black">Crisis</span></span>
-      </a>
+  <!-- ═══ NAVBAR ═══ -->
+  <medicrisis-navbar>
+    <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
+      <i class="fa-solid fa-users text-black/40"></i>
+      <span class="stat-value font-bold text-black">0</span> Surgeons
     </div>
-
-    <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-      <a href="index.html"
-        class="nav-link relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
-        <span class="relative z-10">Home</span>
-        <div
-          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
-        </div>
-      </a>
-      <a href="leaderboard.html"
-        class="nav-link active relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
-        <span class="relative z-10">Leaderboard</span>
-        <div
-          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
-        </div>
-      </a>
-      <a href="admin.html"
-        class="nav-link relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
-        <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
-        <div
-          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
-        </div>
-      </a>
+    <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
+      <div class="pulse-dot"></div>
+      <span class="text-xs font-bold text-black tracking-wide">LIVE</span>
     </div>
-
-    <div class="flex items-center gap-4">
-      <div id="playerCount" class="hidden md:flex items-center gap-2 text-xs text-black/50">
-        <i class="fa-solid fa-users text-black/40"></i>
-        <span class="stat-value font-bold text-black">0</span> Surgeons
-      </div>
-      <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
-        <div class="pulse-dot"></div>
-        <span class="text-xs font-bold text-black tracking-wide">LIVE</span>
-      </div>
-    </div>
-  </nav>
+  </medicrisis-navbar>
 
   <!-- ═══ MAIN ═══ -->
   <main class="relative z-10 flex-1 px-4 pt-28 pb-3 max-w-7xl mx-auto w-full flex flex-col overflow-hidden">
@@ -1037,6 +1000,7 @@ void main(){
       renderer.render(scene, camera);
     })();
   </script>
+  <script src="navbar.js"></script>
 </body>
 
 </html>

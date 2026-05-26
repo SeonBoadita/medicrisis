@@ -171,22 +171,15 @@
     <div class="cb"></div>
   </div>
 
-  <nav class="navbar flex items-center justify-between" id="navbar">
-    <a href="leaderboard.html" class="flex items-center gap-3">
-      <img src="assets/logo/mainLogo.svg" class="w-10 h-10 object-contain" style="filter:brightness(0)">
-      <span class="font-doto text-2xl font-bold tracking-wider text-black">medi<span
-          class="font-black">Crisis</span></span>
-    </a>
-    <div class="flex items-center gap-3">
-      <a href="leaderboard.html"
-        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/50 hover:text-black transition-colors"><i
-          class="fa-solid fa-arrow-left mr-1"></i>Back</a>
-      <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
-        <div class="pulse-dot"></div>
-        <span class="text-xs font-bold text-black tracking-wide">PROFILE</span>
-      </div>
+  <medicrisis-navbar>
+    <a href="leaderboard.html"
+      class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/50 hover:text-black transition-colors"><i
+        class="fa-solid fa-arrow-left mr-1"></i>Back</a>
+    <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
+      <div class="pulse-dot"></div>
+      <span class="text-xs font-bold text-black tracking-wide">PROFILE</span>
     </div>
-  </nav>
+  </medicrisis-navbar>
 
   <main class="relative z-10 max-w-4xl mx-auto px-4 pt-32 pb-12">
     <!-- Header -->
@@ -377,6 +370,7 @@ void main(){float a=uResolution.x/uResolution.y,gs=35.0;vec2 uv=vec2(vUv.x*a,vUv
     addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); mat.uniforms.uResolution.value.set(innerWidth, innerHeight); });
     (function animate() { requestAnimationFrame(animate); mat.uniforms.uTime.value = clock.getElapsedTime(); mat.uniforms.uMouse.value.copy(mouse); renderer.render(scene, camera); })();
   </script>
+  <script src="navbar.js"></script>
 </body>
 
 </html>
