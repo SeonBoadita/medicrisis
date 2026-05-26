@@ -1,4 +1,4 @@
-const CACHE_NAME = 'medicrisis-v7';
+const CACHE_NAME = 'medicrisis-v8';
 const STATIC_ASSETS = [
   '/medicrisis/frontend/leaderboard.html',
   '/medicrisis/frontend/index.html',
