@@ -10,15 +10,18 @@
   <meta name="theme-color" content="#000000">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
-  <script>tailwind.config={theme:{extend:{fontFamily:{doto:['Doto'],inter:['Inter']}}}}</script>
-  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
+  <script
+    type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
+  <script>tailwind.config = { theme: { extend: { fontFamily: { doto: ['Doto'], inter: ['Inter'] } } } }</script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });</script>
   <style>
     * {
       margin: 0;
@@ -148,10 +151,11 @@
       color: #000 !important;
       font-weight: 900;
     }
+
     .nav-link.active div.absolute {
       transform: translateY(0) !important;
       background-color: #fff !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
 
     @keyframes shimmer {
@@ -321,35 +325,184 @@
 
 
     /* ── Achievement Badges ─────────────────────── */
-    .badge-row { display:flex;gap:4px;flex-wrap:wrap; }
-    .badge { display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:20px;font-size:0.55rem;font-weight:700;cursor:default; }
-    .badge-flash    { background:rgba(139,92,246,.1);color:#8b5cf6;border:1px solid rgba(139,92,246,.2); }
-    .badge-iron     { background:rgba(245,158,11,.1);color:#d97706;border:1px solid rgba(245,158,11,.2); }
-    .badge-survivor { background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2); }
+    .badge-row {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 1px 6px;
+      border-radius: 20px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      cursor: default;
+    }
+
+    .badge-flash {
+      background: rgba(139, 92, 246, .1);
+      color: #8b5cf6;
+      border: 1px solid rgba(139, 92, 246, .2);
+    }
+
+    .badge-iron {
+      background: rgba(245, 158, 11, .1);
+      color: #d97706;
+      border: 1px solid rgba(245, 158, 11, .2);
+    }
+
+    .badge-survivor {
+      background: rgba(239, 68, 68, .1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, .2);
+    }
 
 
     /* ── Chart Tabs ─────────────────────────────── */
-    .chart-tabs { display:flex;gap:4px;margin-bottom:12px; }
-    .chart-tab { padding:4px 12px;border-radius:20px;font-size:.6rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;border:1px solid rgba(0,0,0,.08);background:transparent;color:rgba(0,0,0,.4);transition:all .2s; }
-    .chart-tab.active { background:#000;color:#fff;border-color:#000; }
-    .chart-panel { display:none;flex:1;position:relative; }
-    .chart-panel.active { display:flex;flex-direction:column; }
+    .chart-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .chart-tab {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, .08);
+      background: transparent;
+      color: rgba(0, 0, 0, .4);
+      transition: all .2s;
+    }
+
+    .chart-tab.active {
+      background: #000;
+      color: #fff;
+      border-color: #000;
+    }
+
+    .chart-panel {
+      display: none;
+      flex: 1;
+      position: relative;
+    }
+
+    .chart-panel.active {
+      display: flex;
+      flex-direction: column;
+    }
 
     /* ── Deep-Dive Modal ────────────────────────── */
-    .modal-overlay { position:fixed;inset:0;z-index:200;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(255,255,255,.4);opacity:0;pointer-events:none;transition:opacity .35s; }
-    .modal-overlay.open { opacity:1;pointer-events:all; }
-    .modal-glass { position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:min(520px,92vw);background:rgba(255,255,255,.82);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(0,0,0,.1);border-radius:24px;box-shadow:0 32px 80px rgba(0,0,0,.12);padding:28px;transition:transform .4s cubic-bezier(.22,1,.36,1); }
-    .modal-overlay.open .modal-glass { transform:translate(-50%,-50%); }
-    .modal-close { position:absolute;top:16px;right:16px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.07);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:#000;transition:background .2s; }
-    .modal-close:hover { background:rgba(0,0,0,.12); }
-    .modal-tier-row { display:flex;align-items:center;gap:10px;margin-bottom:16px; }
-    .modal-score-big { font-family:'Doto',monospace;font-size:3.5rem;font-weight:900;line-height:1; }
-    .audio-btn { display:flex;align-items:center;gap:8px;padding:8px 18px;border-radius:30px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.04);font-size:.7rem;font-weight:700;cursor:pointer;transition:all .2s;color:#000;margin-top:16px;width:100%; }
-    .audio-btn:hover { background:rgba(0,0,0,.08); }
-    .audio-btn.playing { background:#000;color:#fff; }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, .4);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-glass {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -60%);
+      width: min(520px, 92vw);
+      background: rgba(255, 255, 255, .82);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid rgba(0, 0, 0, .1);
+      border-radius: 24px;
+      box-shadow: 0 32px 80px rgba(0, 0, 0, .12);
+      padding: 28px;
+      transition: transform .4s cubic-bezier(.22, 1, .36, 1);
+    }
+
+    .modal-overlay.open .modal-glass {
+      transform: translate(-50%, -50%);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .07);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .7rem;
+      color: #000;
+      transition: background .2s;
+    }
+
+    .modal-close:hover {
+      background: rgba(0, 0, 0, .12);
+    }
+
+    .modal-tier-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .modal-score-big {
+      font-family: 'Doto', monospace;
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .audio-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 30px;
+      border: 1px solid rgba(0, 0, 0, .1);
+      background: rgba(0, 0, 0, .04);
+      font-size: .7rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      color: #000;
+      margin-top: 16px;
+      width: 100%;
+    }
+
+    .audio-btn:hover {
+      background: rgba(0, 0, 0, .08);
+    }
+
+    .audio-btn.playing {
+      background: #000;
+      color: #fff;
+    }
 
     /* ── Clickable Row ──────────────────────────── */
-    .player-row { cursor:pointer; }
+    .player-row {
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -387,12 +540,16 @@
       <a href="leaderboard.html"
         class="nav-link active relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10">Leaderboard</span>
-        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+        <div
+          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
+        </div>
       </a>
       <a href="admin.html"
         class="nav-link relative px-5 py-2 text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full">
         <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
-        <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+        <div
+          class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full">
+        </div>
       </a>
     </div>
 
@@ -454,19 +611,24 @@
       </div>
 
       <!-- Analytics Dashboard -->
-      <div class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2 p-4">
-        <h3 class="text-xs text-black/60 font-bold uppercase tracking-widest mb-3"><i class="fa-solid fa-chart-mixed mr-2"></i>Enterprise Analytics</h3>
+      <div
+        class="backdrop-blur-md bg-white/60 rounded-2xl flex-1 flex flex-col overflow-hidden border border-black/8 shadow-lg w-full lg:w-1/2 p-4">
+        <h3 class="text-xs text-black/60 font-bold uppercase tracking-widest mb-3"><i
+            class="fa-solid fa-chart-mixed mr-2"></i>Enterprise Analytics</h3>
 
         <!-- Tab Switcher -->
         <div class="chart-tabs">
-          <button class="chart-tab active" onclick="switchTab('charts')"><i class="fa-solid fa-chart-line mr-1 text-[0.7rem]"></i> Charts</button>
-          <button class="chart-tab" onclick="switchTab('server')"><i class="fa-solid fa-server mr-1 text-[0.7rem]"></i> Server</button>
+          <button class="chart-tab active" onclick="switchTab('charts')"><i
+              class="fa-solid fa-chart-line mr-1 text-[0.7rem]"></i> Charts</button>
+          <button class="chart-tab" onclick="switchTab('server')"><i class="fa-solid fa-server mr-1 text-[0.7rem]"></i>
+            Server</button>
         </div>
 
         <!-- Trend Chart -->
         <div class="chart-panel active" id="panel-charts" style="gap:8px">
           <div style="flex:1;min-height:0;display:flex;flex-direction:column">
-            <p class="text-[0.6rem] text-black/40 font-bold uppercase tracking-widest mb-1" id="trendLabel">All Surgeons — Last 30</p>
+            <p class="text-[0.6rem] text-black/40 font-bold uppercase tracking-widest mb-1" id="trendLabel">All Surgeons
+              — Last 30</p>
             <div style="flex:1;position:relative;min-height:0">
               <canvas id="timeSeriesChart"></canvas>
             </div>
@@ -475,17 +637,24 @@
 
         <!-- Server Control -->
         <div class="chart-panel" id="panel-server">
-          <div class="flex-1 relative rounded-xl border border-black/5 overflow-hidden flex flex-col items-center justify-center bg-black/5 p-6 text-center" id="server-control-container">
-            <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(circle at center,transparent,rgba(0,0,0,0.05));"></div>
+          <div
+            class="flex-1 relative rounded-xl border border-black/5 overflow-hidden flex flex-col items-center justify-center bg-black/5 p-6 text-center"
+            id="server-control-container">
+            <div class="absolute inset-0 pointer-events-none"
+              style="background:radial-gradient(circle at center,transparent,rgba(0,0,0,0.05));"></div>
             <i class="fa-solid fa-server text-3xl text-black/40 mb-4 z-10"></i>
             <h4 class="text-sm font-bold text-black uppercase tracking-widest mb-2 z-10">Simulation Server</h4>
             <p class="text-xs text-black/50 mb-6 max-w-xs z-10">Real-time telemetry and multiplayer physics engine.</p>
-            <button id="serverActionBtn" onclick="toggleServer()" class="relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2">
+            <button id="serverActionBtn" onclick="toggleServer()"
+              class="relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2">
               <i class="fa-solid fa-power-off transition-transform"></i>
               <span class="relative z-10">Initialize Server</span>
-              <div class="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 rounded-full"></div>
+              <div
+                class="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 rounded-full">
+              </div>
             </button>
-            <p id="serverStatusText" class="text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10">Server Offline</p>
+            <p id="serverStatusText" class="text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10">
+              Server Offline</p>
           </div>
         </div>
       </div>
@@ -530,14 +699,16 @@
         </div>
       </div>
       <div class="rounded-xl border border-black/8 p-4 mb-2" style="background:rgba(0,0,0,.02)">
-        <p class="text-[0.6rem] text-black/40 font-bold uppercase tracking-widest mb-2"><i class="fa-solid fa-robot mr-1"></i>AI Chief Surgeon Review</p>
+        <p class="text-[0.6rem] text-black/40 font-bold uppercase tracking-widest mb-2"><i
+            class="fa-solid fa-robot mr-1"></i>AI Chief Surgeon Review</p>
         <p class="text-sm text-black/80 leading-relaxed" id="modalDebrief">No debrief available.</p>
       </div>
       <button class="audio-btn" id="audioBtn" onclick="playDebrief()">
         <i class="fa-solid fa-play" id="audioBtnIcon"></i>
         <span id="audioBtnText">Play AI Audio Debrief</span>
       </button>
-      <a id="modalProfileLink" href="#" class="mt-3 flex items-center justify-center gap-2 text-[0.65rem] font-bold text-black/40 hover:text-black transition-colors uppercase tracking-widest">
+      <a id="modalProfileLink" href="#"
+        class="mt-3 flex items-center justify-center gap-2 text-[0.65rem] font-bold text-black/40 hover:text-black transition-colors uppercase tracking-widest">
         <i class="fa-solid fa-chart-line"></i> View Full Surgeon Profile
       </a>
     </div>
@@ -573,19 +744,19 @@
     }
 
     // ── Helpers ────────────────────────────────────────
-    function formatTime(sec) { const m=Math.floor(sec/60),s=sec%60; return `${m}m ${String(s).padStart(2,'0')}s`; }
+    function formatTime(sec) { const m = Math.floor(sec / 60), s = sec % 60; return `${m}m ${String(s).padStart(2, '0')}s`; }
     function statusBadge(status) {
-      const s=(status||'').toLowerCase();
-      if(s==='completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
-      if(s==='stopped'||s==='failed') return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
+      const s = (status || '').toLowerCase();
+      if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
+      if (s === 'stopped' || s === 'failed') return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
       return `<span class="status-badge status-left"><i class="fa-solid fa-minus mr-1"></i>Abandoned</span>`;
     }
-    function rankClass(i){return i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-default';}
-    function rankIcon(i){return i===0?'<i class="fa-solid fa-crown text-xs"></i>':i+1;}
-    function playerKey(p){return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`;}
-    function sortData(d){return [...d].sort((a,b)=>{const diff=(b.integrity_score||0)-(a.integrity_score||0);return diff!==0?diff:(a.duration_seconds||0)-(b.duration_seconds||0);});}
-    function scoreColor(s){return s>=80?'#000':s>=50?'#666':'#ff3b5c';}
-    function scoreRingSVG(score){const r=17,c=2*Math.PI*r,off=c-(score/100)*c,col=scoreColor(score);return `<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2.5"/><circle cx="20" cy="20" r="${r}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round"/></svg>`;}
+    function rankClass(i) { return i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default'; }
+    function rankIcon(i) { return i === 0 ? '<i class="fa-solid fa-crown text-xs"></i>' : i + 1; }
+    function playerKey(p) { return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`; }
+    function sortData(d) { return [...d].sort((a, b) => { const diff = (b.integrity_score || 0) - (a.integrity_score || 0); return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0); }); }
+    function scoreColor(s) { return s >= 80 ? '#000' : s >= 50 ? '#666' : '#ff3b5c'; }
+    function scoreRingSVG(score) { const r = 17, c = 2 * Math.PI * r, off = c - (score / 100) * c, col = scoreColor(score); return `<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2.5"/><circle cx="20" cy="20" r="${r}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round"/></svg>`; }
 
     function getBadges(player) {
       return '';
@@ -609,45 +780,45 @@
 
     // ── Stats ──────────────────────────────────────────
     function updateStats(data) {
-      if(!data.length) return;
-      const scores=data.map(d=>parseInt(d.integrity_score)||0);
-      const top=Math.max(...scores), avg=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
-      const completed=data.filter(d=>['completed'].includes((d.surgery_status||'').toLowerCase())).length;
-      const rate=Math.round((completed/data.length)*100);
-      gsap.to('#topScore',{textContent:top,duration:.6,snap:{textContent:1},onUpdate(){document.getElementById('topScore').textContent=Math.round(gsap.getProperty('#topScore','textContent'))+'%';}});
-      document.getElementById('avgScore').textContent=avg+'%';
-      document.getElementById('successRate').textContent=rate+'%';
-      document.getElementById('playerCount').querySelector('.stat-value').textContent=data.length;
+      if (!data.length) return;
+      const scores = data.map(d => parseInt(d.integrity_score) || 0);
+      const top = Math.max(...scores), avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      const completed = data.filter(d => ['completed'].includes((d.surgery_status || '').toLowerCase())).length;
+      const rate = Math.round((completed / data.length) * 100);
+      gsap.to('#topScore', { textContent: top, duration: .6, snap: { textContent: 1 }, onUpdate() { document.getElementById('topScore').textContent = Math.round(gsap.getProperty('#topScore', 'textContent')) + '%'; } });
+      document.getElementById('avgScore').textContent = avg + '%';
+      document.getElementById('successRate').textContent = rate + '%';
+      document.getElementById('playerCount').querySelector('.stat-value').textContent = data.length;
     }
 
     // ── Chart Tab Switcher ─────────────────────────────
     function switchTab(tab) {
-      document.querySelectorAll('.chart-tab').forEach((b,i)=>{
-        b.classList.toggle('active',['charts','server'][i]===tab);
+      document.querySelectorAll('.chart-tab').forEach((b, i) => {
+        b.classList.toggle('active', ['charts', 'server'][i] === tab);
       });
-      document.querySelectorAll('.chart-panel').forEach(p=>{
-        p.classList.toggle('active',p.id===`panel-${tab}`);
+      document.querySelectorAll('.chart-panel').forEach(p => {
+        p.classList.toggle('active', p.id === `panel-${tab}`);
       });
     }
 
     // ── Trend Chart ────────────────────────────────────
     let timeSeriesChart;
     function initChart() {
-      const ctx=document.getElementById('timeSeriesChart').getContext('2d');
-      timeSeriesChart=new Chart(ctx,{
-        type:'line',
-        data:{labels:[],datasets:[{label:'Health Score',data:[],borderColor:'#000',backgroundColor:'rgba(0,0,0,0.06)',tension:.4,fill:true,pointRadius:4,pointBackgroundColor:'#000'}]},
-        options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10}}},x:{grid:{display:false},ticks:{font:{size:9}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Health: ${ctx.raw}%`}}}}
+      const ctx = document.getElementById('timeSeriesChart').getContext('2d');
+      timeSeriesChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Health Score', data: [], borderColor: '#000', backgroundColor: 'rgba(0,0,0,0.06)', tension: .4, fill: true, pointRadius: 4, pointBackgroundColor: '#000' }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `Health: ${ctx.raw}%` } } } }
       });
     }
     function updateChart(data) {
-      if(!timeSeriesChart) return;
-      const recent=data.slice(0,30).reverse();
-      timeSeriesChart.data.labels=recent.map(d=>d.player_name.split(' ')[0]||'');
-      timeSeriesChart.data.datasets[0].data=recent.map(d=>{
-        let score = parseInt(d.integrity_score)||0;
-        const status = (d.surgery_status||'').toLowerCase();
-        if(status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
+      if (!timeSeriesChart) return;
+      const recent = data.slice(0, 30).reverse();
+      timeSeriesChart.data.labels = recent.map(d => d.player_name.split(' ')[0] || '');
+      timeSeriesChart.data.datasets[0].data = recent.map(d => {
+        let score = parseInt(d.integrity_score) || 0;
+        const status = (d.surgery_status || '').toLowerCase();
+        if (status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
           score = 0;
         }
         return score;
@@ -656,147 +827,147 @@
     }
     async function loadSurgeonTrend(name) {
       try {
-        const res=await fetch(`http://localhost:3000/api/surgeon/${encodeURIComponent(name)}/history`);
-        if(!res.ok) throw new Error();
-        const rows=await res.json();
-        document.getElementById('trendLabel').textContent=`${name} — Last ${rows.length} Sessions`;
-        timeSeriesChart.data.labels=rows.map((_,i)=>`#${i+1}`);
-        timeSeriesChart.data.datasets[0].data=rows.map(r=>{
-          let score = parseInt(r.integrity_score)||0;
-          const status = (r.surgery_status||'').toLowerCase();
-          if(status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
+        const res = await fetch(`http://localhost:3000/api/surgeon/${encodeURIComponent(name)}/history`);
+        if (!res.ok) throw new Error();
+        const rows = await res.json();
+        document.getElementById('trendLabel').textContent = `${name} — Last ${rows.length} Sessions`;
+        timeSeriesChart.data.labels = rows.map((_, i) => `#${i + 1}`);
+        timeSeriesChart.data.datasets[0].data = rows.map(r => {
+          let score = parseInt(r.integrity_score) || 0;
+          const status = (r.surgery_status || '').toLowerCase();
+          if (status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
             score = 0;
           }
           return score;
         });
         timeSeriesChart.update();
         switchTab('charts');
-      } catch(e){ console.warn('Surgeon history unavailable'); }
+      } catch (e) { console.warn('Surgeon history unavailable'); }
     }
 
 
     // ── Render Leaderboard ─────────────────────────────
     function renderLeaderboard(data, isInitial) {
-      const board=document.getElementById('leaderboard');
-      const sorted=sortData(data);
-      const newKeys=new Set(sorted.map(playerKey));
-      const freshKeys=new Set();
-      newKeys.forEach(k=>{if(!knownPlayerKeys.has(k)) freshKeys.add(k);});
-      knownPlayerKeys=newKeys;
-      board.innerHTML=sorted.map((p,i)=>buildRow(p,i,!isInitial&&freshKeys.has(playerKey(p)))).join('');
-      const rows=board.querySelectorAll('.player-row');
-      if(isInitial){gsap.from(rows,{y:40,opacity:0,duration:.5,stagger:.07,ease:'power3.out',clearProps:'all'});}
-      else if(freshKeys.size>0){rows.forEach(row=>{if(freshKeys.has(row.dataset.key)) gsap.from(row,{x:-60,opacity:0,duration:.6,ease:'back.out(1.4)',clearProps:'all'});});}
+      const board = document.getElementById('leaderboard');
+      const sorted = sortData(data);
+      const newKeys = new Set(sorted.map(playerKey));
+      const freshKeys = new Set();
+      newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
+      knownPlayerKeys = newKeys;
+      board.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
+      const rows = board.querySelectorAll('.player-row');
+      if (isInitial) { gsap.from(rows, { y: 40, opacity: 0, duration: .5, stagger: .07, ease: 'power3.out', clearProps: 'all' }); }
+      else if (freshKeys.size > 0) { rows.forEach(row => { if (freshKeys.has(row.dataset.key)) gsap.from(row, { x: -60, opacity: 0, duration: .6, ease: 'back.out(1.4)', clearProps: 'all' }); }); }
       attachHover();
       updateStats(sorted);
       updateChart(sorted);
-      document.getElementById('lastUpdate').innerHTML=`<i class="fa-solid fa-check text-black"></i> Live sync active`;
+      document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-check text-black"></i> Live sync active`;
     }
 
     // ── Deep-Dive Modal ────────────────────────────────
     function openModal(item) {
       const player = typeof item === 'number' ? cachedData[item] : (typeof item === 'string' ? JSON.parse(item) : item);
       activeModal = player;
-      const score = player.integrity_score||0;
+      const score = player.integrity_score || 0;
       document.getElementById('modalScore').textContent = score;
       document.getElementById('modalScore').style.color = scoreColor(score);
-      document.getElementById('modalName').textContent = player.player_name||'Unknown';
+      document.getElementById('modalName').textContent = player.player_name || 'Unknown';
       document.getElementById('modalBadges').innerHTML = getBadges(player);
-      document.getElementById('modalDuration').textContent = formatTime(player.duration_seconds||0);
+      document.getElementById('modalDuration').textContent = formatTime(player.duration_seconds || 0);
       document.getElementById('modalStatus').innerHTML = statusBadge(player.surgery_status);
-      document.getElementById('modalDebrief').textContent = player.ai_debrief||'No debrief available for this session.';
-      document.getElementById('modalProfileLink').href = `surgeon-profile.html?name=${encodeURIComponent(player.player_name||'')}`;
+      document.getElementById('modalDebrief').textContent = player.ai_debrief || 'No debrief available for this session.';
+      document.getElementById('modalProfileLink').href = `surgeon-profile.html?name=${encodeURIComponent(player.player_name || '')}`;
       resetAudioBtn();
       document.getElementById('modalOverlay').classList.add('open');
     }
     function closeModal(e) {
-      if(e&&e.target!==document.getElementById('modalOverlay')) return;
+      if (e && e.target !== document.getElementById('modalOverlay')) return;
       document.getElementById('modalOverlay').classList.remove('open');
-      if(audioEl){audioEl.pause();audioEl=null;}
+      if (audioEl) { audioEl.pause(); audioEl = null; }
       resetAudioBtn();
     }
-    function resetAudioBtn(){
-      document.getElementById('audioBtnIcon').className='fa-solid fa-play';
-      document.getElementById('audioBtnText').textContent='Play AI Audio Debrief';
+    function resetAudioBtn() {
+      document.getElementById('audioBtnIcon').className = 'fa-solid fa-play';
+      document.getElementById('audioBtnText').textContent = 'Play AI Audio Debrief';
       document.getElementById('audioBtn').classList.remove('playing');
     }
     async function playDebrief() {
-      if(!activeModal?.ai_debrief) return;
-      if(audioEl&&!audioEl.paused){audioEl.pause();resetAudioBtn();return;}
-      const btn=document.getElementById('audioBtn');
+      if (!activeModal?.ai_debrief) return;
+      if (audioEl && !audioEl.paused) { audioEl.pause(); resetAudioBtn(); return; }
+      const btn = document.getElementById('audioBtn');
       btn.classList.add('playing');
-      document.getElementById('audioBtnIcon').className='fa-solid fa-circle-notch fa-spin';
-      document.getElementById('audioBtnText').textContent='Loading audio…';
+      document.getElementById('audioBtnIcon').className = 'fa-solid fa-circle-notch fa-spin';
+      document.getElementById('audioBtnText').textContent = 'Loading audio…';
       try {
-        const res=await fetch('http://localhost:3000/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:activeModal.ai_debrief})});
-        if(!res.ok) throw new Error();
-        const {audio}=await res.json();
-        const bytes=atob(audio), ab=new Uint8Array(bytes.length);
-        for(let i=0;i<bytes.length;i++) ab[i]=bytes.charCodeAt(i);
-        const blob=new Blob([ab],{type:'audio/mpeg'});
-        audioEl=new Audio(URL.createObjectURL(blob));
+        const res = await fetch('http://localhost:3000/api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: activeModal.ai_debrief }) });
+        if (!res.ok) throw new Error();
+        const { audio } = await res.json();
+        const bytes = atob(audio), ab = new Uint8Array(bytes.length);
+        for (let i = 0; i < bytes.length; i++) ab[i] = bytes.charCodeAt(i);
+        const blob = new Blob([ab], { type: 'audio/mpeg' });
+        audioEl = new Audio(URL.createObjectURL(blob));
         audioEl.play();
-        document.getElementById('audioBtnIcon').className='fa-solid fa-stop';
-        document.getElementById('audioBtnText').textContent='Stop Playback';
-        audioEl.onended=resetAudioBtn;
+        document.getElementById('audioBtnIcon').className = 'fa-solid fa-stop';
+        document.getElementById('audioBtnText').textContent = 'Stop Playback';
+        audioEl.onended = resetAudioBtn;
       } catch {
-        document.getElementById('audioBtnText').textContent='Audio unavailable';
+        document.getElementById('audioBtnText').textContent = 'Audio unavailable';
         btn.classList.remove('playing');
       }
     }
 
     // ── AI Toast ───────────────────────────────────────
     function showAIDebrief(text) {
-      if(!text) return;
-      document.getElementById('ai-debrief-text').textContent=text;
-      const toast=document.getElementById('ai-debrief-toast');
+      if (!text) return;
+      document.getElementById('ai-debrief-text').textContent = text;
+      const toast = document.getElementById('ai-debrief-toast');
       toast.classList.remove('translate-x-[120%]');
-      setTimeout(()=>toast.classList.add('translate-x-[120%]'),8000);
+      setTimeout(() => toast.classList.add('translate-x-[120%]'), 8000);
     }
 
 
     // ── Fetch ──────────────────────────────────────────
-    async function fetchData(isInitial=false) {
+    async function fetchData(isInitial = false) {
       try {
-        const hospital='public';
-        const res=await fetch(`http://localhost:3000/api/leaderboard?hospital_id=${hospital}`).catch(()=>fetch(API_URL));
-        if(!res||!res.ok) throw new Error();
-        const data=await res.json();
-        cachedData=Array.isArray(data)?data:(data.data||[]);
-        if(cachedData.length) renderLeaderboard(cachedData,isInitial);
-        else if(isInitial) document.getElementById('leaderboard').innerHTML=`<div class="backdrop-blur-md bg-white/60 rounded-2xl p-12 text-center"><i class="fa-solid fa-satellite-dish text-4xl text-black/20 block mb-4"></i><p class="text-black/60 text-sm font-medium">No surgeons yet — awaiting first entry…</p></div>`;
-      } catch { document.getElementById('lastUpdate').innerHTML=`<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`; }
+        const hospital = 'public';
+        const res = await fetch(`http://localhost:3000/api/leaderboard?hospital_id=${hospital}`).catch(() => fetch(API_URL));
+        if (!res || !res.ok) throw new Error();
+        const data = await res.json();
+        cachedData = Array.isArray(data) ? data : (data.data || []);
+        if (cachedData.length) renderLeaderboard(cachedData, isInitial);
+        else if (isInitial) document.getElementById('leaderboard').innerHTML = `<div class="backdrop-blur-md bg-white/60 rounded-2xl p-12 text-center"><i class="fa-solid fa-satellite-dish text-4xl text-black/20 block mb-4"></i><p class="text-black/60 text-sm font-medium">No surgeons yet — awaiting first entry…</p></div>`;
+      } catch { document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Disconnected`; }
     }
 
     // ── Server Control (preserved) ─────────────────────
-    let isServerOnline=false, globalSocket=null;
-    async function toggleServer(){isServerOnline?stopNodeServer():startNodeServer();}
-    function setButtonStateOnline(){isServerOnline=true;const b=document.getElementById('serverActionBtn'),s=document.getElementById('serverStatusText');b.classList.remove('opacity-50','pointer-events-none');b.querySelector('span').textContent='Stop Server';b.querySelector('i').className='fa-solid fa-stop transition-transform';b.className='relative overflow-hidden z-10 bg-[#ff3b5c]/10 text-[#ff3b5c] px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2 border border-[#ff3b5c]/30';s.textContent='Server Online & Connected';s.className='text-[10px] font-bold text-[#00ff88] mt-4 uppercase tracking-widest z-10';}
-    function setButtonStateOffline(){isServerOnline=false;const b=document.getElementById('serverActionBtn'),s=document.getElementById('serverStatusText');b.classList.remove('opacity-50','pointer-events-none');b.querySelector('span').textContent='Initialize Server';b.querySelector('i').className='fa-solid fa-power-off transition-transform';b.className='relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2';s.textContent='Server Offline';s.className='text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10';}
-    async function stopNodeServer(){const b=document.getElementById('serverActionBtn'),s=document.getElementById('serverStatusText');b.classList.add('opacity-50','pointer-events-none');b.querySelector('span').textContent='Stopping...';b.querySelector('i').className='fa-solid fa-circle-notch fa-spin';s.textContent='Shutting down...';try{await fetch('../stop_server.php',{method:'POST'});}catch(e){}if(globalSocket)globalSocket.disconnect();setTimeout(setButtonStateOffline,1000);}
-    async function startNodeServer(){const b=document.getElementById('serverActionBtn'),s=document.getElementById('serverStatusText');b.classList.add('opacity-50','pointer-events-none');b.querySelector('span').textContent='Starting...';b.querySelector('i').className='fa-solid fa-power-off fa-spin';s.textContent='Booting telemetry engine...';try{const res=await fetch('../start_server.php',{method:'POST'});const data=await res.json();if(data.success){s.textContent='Server booted. Connecting...';setTimeout(()=>initWebSocket(),1000);}else throw new Error(data.error);}catch(e){s.textContent='Failed to start server.';s.className='text-[10px] font-bold text-red-500 mt-4 uppercase tracking-widest z-10';b.classList.remove('opacity-50','pointer-events-none');b.querySelector('span').textContent='Retry Initialization';b.querySelector('i').className='fa-solid fa-triangle-exclamation';}}
+    let isServerOnline = false, globalSocket = null;
+    async function toggleServer() { isServerOnline ? stopNodeServer() : startNodeServer(); }
+    function setButtonStateOnline() { isServerOnline = true; const b = document.getElementById('serverActionBtn'), s = document.getElementById('serverStatusText'); b.classList.remove('opacity-50', 'pointer-events-none'); b.querySelector('span').textContent = 'Stop Server'; b.querySelector('i').className = 'fa-solid fa-stop transition-transform'; b.className = 'relative overflow-hidden z-10 bg-[#ff3b5c]/10 text-[#ff3b5c] px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2 border border-[#ff3b5c]/30'; s.textContent = 'Server Online & Connected'; s.className = 'text-[10px] font-bold text-[#00ff88] mt-4 uppercase tracking-widest z-10'; }
+    function setButtonStateOffline() { isServerOnline = false; const b = document.getElementById('serverActionBtn'), s = document.getElementById('serverStatusText'); b.classList.remove('opacity-50', 'pointer-events-none'); b.querySelector('span').textContent = 'Initialize Server'; b.querySelector('i').className = 'fa-solid fa-power-off transition-transform'; b.className = 'relative overflow-hidden z-10 bg-black text-white px-8 py-3 rounded-full font-bold text-xs uppercase tracking-widest transition-all duration-300 hover:scale-105 group flex items-center gap-2'; s.textContent = 'Server Offline'; s.className = 'text-[10px] font-bold text-black/40 mt-4 uppercase tracking-widest z-10'; }
+    async function stopNodeServer() { const b = document.getElementById('serverActionBtn'), s = document.getElementById('serverStatusText'); b.classList.add('opacity-50', 'pointer-events-none'); b.querySelector('span').textContent = 'Stopping...'; b.querySelector('i').className = 'fa-solid fa-circle-notch fa-spin'; s.textContent = 'Shutting down...'; try { await fetch('../stop_server.php', { method: 'POST' }); } catch (e) { } if (globalSocket) globalSocket.disconnect(); setTimeout(setButtonStateOffline, 1000); }
+    async function startNodeServer() { const b = document.getElementById('serverActionBtn'), s = document.getElementById('serverStatusText'); b.classList.add('opacity-50', 'pointer-events-none'); b.querySelector('span').textContent = 'Starting...'; b.querySelector('i').className = 'fa-solid fa-power-off fa-spin'; s.textContent = 'Booting telemetry engine...'; try { const res = await fetch('../start_server.php', { method: 'POST' }); const data = await res.json(); if (data.success) { s.textContent = 'Server booted. Connecting...'; setTimeout(() => initWebSocket(), 1000); } else throw new Error(data.error); } catch (e) { s.textContent = 'Failed to start server.'; s.className = 'text-[10px] font-bold text-red-500 mt-4 uppercase tracking-widest z-10'; b.classList.remove('opacity-50', 'pointer-events-none'); b.querySelector('span').textContent = 'Retry Initialization'; b.querySelector('i').className = 'fa-solid fa-triangle-exclamation'; } }
 
     // ── WebSocket ──────────────────────────────────────
     function initWebSocket() {
       try {
-        if(globalSocket&&globalSocket.connected) return;
-        globalSocket=io('http://localhost:3000',{reconnectionAttempts:3});
-        globalSocket.on('connect',()=>{globalSocket.emit('join_tenant','public');document.getElementById('lastUpdate').innerHTML=`<i class="fa-solid fa-bolt text-[#00ff88]"></i> Socket Connected`;setButtonStateOnline();});
-        globalSocket.on('new_score',(payload)=>{cachedData.push(payload);renderLeaderboard(cachedData,false);if(payload.ai_debrief) showAIDebrief(payload.ai_debrief);});
-        globalSocket.on('disconnect',()=>{document.getElementById('lastUpdate').innerHTML=`<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Socket Disconnected`;setButtonStateOffline();});
-        globalSocket.on('connect_error',()=>setButtonStateOffline());
-      } catch { setInterval(()=>fetchData(false),5000); }
+        if (globalSocket && globalSocket.connected) return;
+        globalSocket = io('http://localhost:3000', { reconnectionAttempts: 3 });
+        globalSocket.on('connect', () => { globalSocket.emit('join_tenant', 'public'); document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-bolt text-[#00ff88]"></i> Socket Connected`; setButtonStateOnline(); });
+        globalSocket.on('new_score', (payload) => { cachedData.push(payload); renderLeaderboard(cachedData, false); if (payload.ai_debrief) showAIDebrief(payload.ai_debrief); });
+        globalSocket.on('disconnect', () => { document.getElementById('lastUpdate').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-500"></i> Socket Disconnected`; setButtonStateOffline(); });
+        globalSocket.on('connect_error', () => setButtonStateOffline());
+      } catch { setInterval(() => fetchData(false), 5000); }
     }
 
     // ── Intro ──────────────────────────────────────────
-    function introAnimation(){gsap.timeline().from('#navbar',{y:-40,opacity:0,duration:.6,ease:'power3.out'}).from('#statsBar > div',{y:30,opacity:0,duration:.4,stagger:.1,ease:'power2.out'},'-=0.2').from('footer',{y:20,opacity:0,duration:.4,ease:'power2.out'},'-=0.2');attachHover();}
+    function introAnimation() { gsap.timeline().from('#navbar', { y: -40, opacity: 0, duration: .6, ease: 'power3.out' }).from('#statsBar > div', { y: 30, opacity: 0, duration: .4, stagger: .1, ease: 'power2.out' }, '-=0.2').from('footer', { y: 20, opacity: 0, duration: .4, ease: 'power2.out' }, '-=0.2'); attachHover(); }
 
     // ── Init ───────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded',()=>{
+    document.addEventListener('DOMContentLoaded', () => {
       introAnimation();
       initChart();
-      fetchData(true).then(()=>initWebSocket());
-      document.addEventListener('keydown',e=>{if(e.key==='Escape') document.getElementById('modalOverlay').classList.remove('open');});
+      fetchData(true).then(() => initWebSocket());
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('modalOverlay').classList.remove('open'); });
     });
 
   </script>

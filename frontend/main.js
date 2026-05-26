@@ -107,7 +107,7 @@ function initSmoothScroll() {
 
 function loadModel() {
   return new Promise((res, rej) => {
-    new GLTFLoader().load('models/DNA3.glb', gltf => {
+    new GLTFLoader().load('models/dna_model.glb', gltf => {
       const model = gltf.scene;
       let bc = null, lc = 0; const rm = [];
       model.traverse(c => {
@@ -308,17 +308,17 @@ function initScrollAnimations() {
   });
   cellInstancedMesh = new THREE.InstancedMesh(cellGeo, cellMat, cellCount);
   cellInstancedMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  
-  for(let i = 0; i < cellCount; i++) {
+
+  for (let i = 0; i < cellCount; i++) {
     const x = (Math.random() - 0.5) * 40;
     const y = (Math.random() - 0.5) * 40;
     const z = (Math.random() - 0.5) * 40 - 10;
     const speed = 0.05 + Math.random() * 0.1;
     const phase = Math.random() * Math.PI * 2;
-    cellData.push({x, y, z, speed, phase});
-    
+    cellData.push({ x, y, z, speed, phase });
+
     dummy.position.set(x, y, z);
-    dummy.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, 0);
+    dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
     const scale = 0.2 + Math.random() * 0.8;
     dummy.scale.set(scale, scale, scale);
     dummy.updateMatrix();
@@ -420,7 +420,7 @@ async function init() {
       isRendering = entry.isIntersecting;
     });
   }, { threshold: 0.01 });
-  
+
   const targetSection = document.getElementById('hero') || document.body;
   observer.observe(targetSection);
 
