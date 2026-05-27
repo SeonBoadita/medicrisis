@@ -197,7 +197,6 @@ function initScrollAnimations() {
   gsap.set('#features', { visibility: 'hidden', opacity: 0 });
   gsap.set('#cta-wrapper', { visibility: 'hidden', clipPath: 'circle(0vmax at 50% 50%)' });
   gsap.set('#features-left', { x: -150, opacity: 0 });
-  gsap.set('#features-right', { x: 150, opacity: 0 });
   gsap.set('#features-grid .feature-card', { y: 150, opacity: 0 });
   gsap.set('#cta-content', { y: 50, opacity: 0, scale: 0.95 });
 
@@ -248,7 +247,6 @@ function initScrollAnimations() {
   tl.set('#features', { visibility: 'visible' })
     .to('#features', { opacity: 1, duration: 0.1 }, 'slide2_in')
     .to('#features-left', { x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 'slide2_in')
-    .to('#features-right', { x: 0, opacity: 1, ease: 'power3.out', duration: 1 }, 'slide2_in')
     .to('#features-grid .feature-card', { y: 0, opacity: 1, stagger: 0.15, ease: 'back.out(1.2)', duration: 1 }, 'slide2_in');
 
   // SLIDE 2 (Features)

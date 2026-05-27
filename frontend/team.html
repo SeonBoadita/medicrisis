@@ -28,6 +28,12 @@
     type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
   <script>tailwind.config = { theme: { extend: { fontFamily: { doto: ['Doto'], inter: ['Inter'] } } } }</script>
 
+  <!-- Preload Profile Images -->
+  <link rel="preload" href="assets/logo/images/profile/Seon_Boadita.png" as="image">
+  <link rel="preload" href="assets/logo/images/profile/Prabhu_Hosalli.png" as="image">
+  <link rel="preload" href="assets/logo/images/profile/Gerontius_Rodrigues.png" as="image">
+  <link rel="preload" href="assets/logo/images/profile/Varun_Raikar.png" as="image">
+
   <style>
     :root {
       --bg: #ffffff;
@@ -312,7 +318,15 @@
       height: 100%;
       object-fit: cover;
       filter: grayscale(0.5) contrast(1.1);
-      transition: filter 0.4s ease;
+      transition: filter 0.4s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+    }
+
+    .card-img-wrap img {
+      opacity: 0;
+    }
+
+    .card-img-wrap img.loaded {
+      opacity: 1;
     }
 
     .team-card:hover .card-img-wrap img,
@@ -473,7 +487,7 @@
       <!-- Member 1 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Seon_Boadita.png" alt="Seon Boadita">
+          <img src="assets/logo/images/profile/Seon_Boadita.png" alt="Seon Boadita" fetchpriority="high" onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
               <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Driving the intersection of VR
@@ -501,7 +515,7 @@
       <!-- Member 2 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Prabhu_Hosalli.png" alt="Prabhu Hosalli">
+          <img src="assets/logo/images/profile/Prabhu_Hosalli.png" alt="Prabhu Hosalli" fetchpriority="high" onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
               <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Building robust multiplayer physics
@@ -529,7 +543,7 @@
       <!-- Member 3 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <div class="placeholder-avatar"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <img src="assets/logo/images/profile/Varun_Raikar.png" alt="Varun Raikar" fetchpriority="high" onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
               <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Designing intuitive, glassmorphic
@@ -547,7 +561,7 @@
         </div>
         <div class="card-info">
           <div>
-            <p class="name">Team Member 3</p>
+            <p class="name">Varun Raikar</p>
             <p class="role">UI/UX Director</p>
           </div>
           <span class="num">03</span>
@@ -557,7 +571,7 @@
       <!-- Member 4 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <div class="placeholder-avatar"><i class="fa-solid fa-microchip"></i></div>
+          <img src="assets/logo/images/profile/Gerontius_Rodrigues.png" alt="Gerontius Rodrigues" fetchpriority="high" onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
               <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Developing AI evaluation models to
@@ -575,7 +589,7 @@
         </div>
         <div class="card-info">
           <div>
-            <p class="name">Team Member 4</p>
+            <p class="name">Gerontius Rodrigues</p>
             <p class="role">AI Researcher</p>
           </div>
           <span class="num">04</span>
@@ -659,22 +673,22 @@
     cards.forEach((card, i) => {
       const img = card.querySelector('.card-img-wrap img, .placeholder-avatar');
 
-      gsap.set(card, { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)', y: 100 });
-      if (img) gsap.set(img, { scale: 1.3 });
+      gsap.set(card, { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0% 100%)', y: 60 });
+      if (img) gsap.set(img, { scale: 1.2 });
 
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: card, start: 'top 80%', toggleActions: 'play none none reverse' }
+        scrollTrigger: { trigger: card, start: 'top 95%', toggleActions: 'play none none reverse' }
       });
 
       tl.to(card, {
         clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0% 100%)', y: 0,
-        ease: 'power4.out', duration: 1.5
+        ease: 'power3.out', duration: 0.8
       }, 0);
 
       if (img) {
         tl.to(img, {
           scale: 1,
-          ease: 'power4.out', duration: 1.5
+          ease: 'power3.out', duration: 0.8
         }, 0);
       }
 
@@ -727,6 +741,13 @@
     gsap.from('#footer > div', {
       y: -50, opacity: 0, scale: 0.9, duration: 1, ease: 'power3.out',
       scrollTrigger: { trigger: '#footer', start: 'top 95%' }
+    });
+
+    // 7. Ensure cached images are marked as loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.card-img-wrap img').forEach(img => {
+        if (img.complete) img.classList.add('loaded');
+      });
     });
 
   </script>
