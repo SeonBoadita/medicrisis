@@ -24,14 +24,14 @@ class MedicrisisNavbar extends HTMLElement {
     if (!rightContent) {
       if (isHome) {
         rightContent = `
-          <a href="#cta" class="hover-trigger magnetic-btn relative overflow-hidden text-[10px] sm:text-xs bg-black text-white px-6 py-3 rounded-full font-bold tracking-widest uppercase transition-all duration-300 group shadow-[0_10px_20px_rgba(0,0,0,.15)] hover:shadow-[0_15px_30px_rgba(0,0,0,.3)] hover:scale-105 inline-block">
+          <a href="#cta" class="hover-trigger magnetic-btn relative overflow-hidden text-[10px] sm:text-xs bg-black text-white px-6 py-3 rounded-full font-bold tracking-widest uppercase transition-all duration-300 group shadow-[0_10px_20px_rgba(0,0,0,.15)] hover:shadow-[0_15px_30px_rgba(0,0,0,.3)] hover:scale-105 inline-block font-doto">
             <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-play text-[10px]"></i> Launch VR</span>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] group-hover:animate-[shimmer_1.5s_infinite] skew-x-[-20deg]"></div>
           </a>
         `;
       } else {
         rightContent = `
-          <a href="index.html" class="hover-trigger magnetic-btn relative overflow-hidden text-[10px] sm:text-xs bg-black text-white px-6 py-3 rounded-full font-bold tracking-widest uppercase transition-all duration-300 group shadow-[0_10px_20px_rgba(0,0,0,.1)] hover:shadow-[0_15px_30px_rgba(0,0,0,.2)] hover:scale-105 inline-block">
+          <a href="index.html" class="hover-trigger magnetic-btn relative overflow-hidden text-[10px] sm:text-xs bg-black text-white px-6 py-3 rounded-full font-bold tracking-widest uppercase transition-all duration-300 group shadow-[0_10px_20px_rgba(0,0,0,.1)] hover:shadow-[0_15px_30px_rgba(0,0,0,.2)] hover:scale-105 inline-block font-doto">
             <span class="relative z-10 flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Back</span>
             <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-[150%] group-hover:animate-[shimmer_1.5s_infinite] skew-x-[-20deg]"></div>
           </a>
@@ -49,19 +49,19 @@ class MedicrisisNavbar extends HTMLElement {
         </div>
         
         <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-          <a href="index.html" class="nav-link ${isHome ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger">
+          <a href="index.html" class="nav-link ${isHome ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">Home</span>
             <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="team.html" class="nav-link ${isTeam ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger">
+          <a href="team.html" class="nav-link ${isTeam ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">The Team</span>
             <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="leaderboard.html" class="nav-link ${isLeaderboard ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger">
+          <a href="leaderboard.html" class="nav-link ${isLeaderboard ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">Leaderboard</span>
             <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger">
+          <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
             <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>

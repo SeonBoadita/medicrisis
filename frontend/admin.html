@@ -29,6 +29,18 @@
       min-height: 100vh
     }
 
+    ::selection {
+      background: #000;
+      color: #fff;
+    }
+
+    .text-white::selection,
+    .text-white *::selection,
+    .bg-black *::selection {
+      background: #fff;
+      color: #000;
+    }
+
     #vr-cursor {
       position: fixed;
       top: 0;
@@ -285,17 +297,17 @@
       <div class="text-center mb-8">
         <div class="text-4xl mb-3"><i class="fa-solid fa-lock text-black/40"></i></div>
         <h1 class="font-doto text-2xl font-black text-black mb-1">Admin Access</h1>
-        <p class="text-xs text-black/40 font-medium">mediCrisis Secure Control Panel</p>
+        <p class="text-xs text-black/40 font-medium font-doto tracking-widest">mediCrisis Secure Control Panel</p>
       </div>
       <input type="password" id="pwdInput" placeholder="Enter admin password" class="input-field mb-4"
         onkeydown="if(event.key==='Enter')doLogin()">
       <button onclick="doLogin()"
-        class="w-full py-3 bg-black text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-black/80 transition-colors flex items-center justify-center gap-2"
+        class="w-full py-3 bg-black text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-black/80 transition-colors flex items-center justify-center gap-2 font-doto"
         id="loginBtn">
         <i class="fa-solid fa-unlock-keyhole"></i> Authenticate
       </button>
       <p id="loginError" class="text-red-500 text-xs text-center mt-3 hidden">Invalid credentials. Access denied.</p>
-      <p class="text-center text-[0.6rem] text-black/25 mt-4 uppercase tracking-widest">Authorized Personnel Only</p>
+      <p class="text-center text-[0.6rem] text-black/25 mt-4 uppercase tracking-widest font-doto">Authorized Personnel Only</p>
     </div>
   </div>
 
@@ -304,10 +316,10 @@
     <medicrisis-navbar>
       <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
         <div class="pulse-dot"></div>
-        <span class="text-xs font-bold text-black tracking-wide">SECURE</span>
+        <span class="text-xs font-bold text-black tracking-widest font-doto">SECURE</span>
       </div>
       <button onclick="doLogout()"
-        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/50 hover:text-black transition-colors"><i
+        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/50 hover:text-black transition-colors font-doto"><i
           class="fa-solid fa-right-from-bracket mr-1"></i>Logout</button>
     </medicrisis-navbar>
 
@@ -316,15 +328,15 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="adminStats">
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
           <p class="font-doto text-2xl font-black" id="statTotal">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1">Total Sessions</p>
+          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Total Sessions</p>
         </div>
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
           <p class="font-doto text-2xl font-black" id="statAvg">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1">Avg Health</p>
+          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Avg Health</p>
         </div>
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
           <p class="font-doto text-2xl font-black" id="statRate">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1">Success Rate</p>
+          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Success Rate</p>
         </div>
       </div>
 
@@ -333,11 +345,11 @@
         <input type="text" id="searchInput" placeholder="Search by name…" class="input-field flex-1"
           style="min-width:200px" oninput="filterTable()">
         <button onclick="exportCSV()" id="exportBtn"
-          class="px-5 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/80 transition-colors flex items-center gap-2 flex-shrink-0">
+          class="px-5 py-2.5 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/80 transition-colors flex items-center gap-2 flex-shrink-0 font-doto">
           <i class="fa-solid fa-file-csv"></i> Export CSV
         </button>
         <button onclick="loadAdminData()"
-          class="px-5 py-2.5 bg-black/5 border border-black/10 text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/10 transition-colors flex-shrink-0">
+          class="px-5 py-2.5 bg-black/5 border border-black/10 text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/10 transition-colors flex-shrink-0 font-doto">
           <i class="fa-solid fa-rotate mr-1"></i> Refresh
         </button>
       </div>
@@ -346,7 +358,7 @@
       <div class="glass rounded-2xl border border-black/8 shadow-lg overflow-hidden">
         <div class="scroll-table">
           <table class="data-table" id="dataTable">
-            <thead class="sticky top-0 z-10" style="background:rgba(255,255,255,.95)">
+            <thead class="sticky top-0 z-10 font-doto" style="background:rgba(255,255,255,.95)">
               <tr>
                 <th>ID</th>
                 <th>Surgeon</th>
@@ -366,7 +378,7 @@
         </div>
       </div>
 
-      <p class="text-center text-[0.6rem] text-black/25 uppercase tracking-widest mt-6"><i
+      <p class="text-center text-[0.6rem] text-black/25 uppercase tracking-widest mt-6 font-doto"><i
           class="fa-solid fa-shield-halved mr-1"></i>Role: Administrator — Full Data Access</p>
     </main>
   </div>

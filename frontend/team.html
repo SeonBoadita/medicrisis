@@ -83,6 +83,13 @@
       color: #fff;
     }
 
+    .text-white::selection,
+    .text-white *::selection,
+    .bg-black *::selection {
+      background: #fff;
+      color: #000;
+    }
+
     /* Cinematic Noise Overlay */
     .noise {
       position: fixed;
@@ -379,6 +386,7 @@
     }
 
     .card-info .role {
+      font-family: 'Doto', monospace;
       font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
@@ -467,7 +475,7 @@
     <div class="max-w-7xl mx-auto w-full flex flex-col items-center text-center">
       <div class="flex items-center justify-center gap-3 mb-6" id="hero-tag">
         <div class="pulse-dot"></div>
-        <span class="text-[10px] text-black/50 tracking-[0.2em] uppercase font-bold">The Minds Behind The
+        <span class="text-[10px] text-black/50 tracking-[0.2em] uppercase font-bold font-doto">The Minds Behind The
           Platform</span>
       </div>
       <h1 class="font-inter hero-title-wrap" id="hero-title">

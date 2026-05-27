@@ -29,6 +29,18 @@
       min-height: 100vh
     }
 
+    ::selection {
+      background: #000;
+      color: #fff;
+    }
+
+    .text-white::selection,
+    .text-white *::selection,
+    .bg-black *::selection {
+      background: #fff;
+      color: #000;
+    }
+
     #vr-cursor {
       position: fixed;
       top: 0;
@@ -177,7 +189,7 @@
         class="fa-solid fa-arrow-left mr-1"></i>Back</a>
     <div class="flex items-center gap-2 bg-black/5 rounded-full px-3 py-2 border border-black/10">
       <div class="pulse-dot"></div>
-      <span class="text-xs font-bold text-black tracking-wide">PROFILE</span>
+      <span class="text-xs font-bold text-black tracking-widest font-doto">PROFILE</span>
     </div>
   </medicrisis-navbar>
 
@@ -189,7 +201,7 @@
           class="w-20 h-20 rounded-full bg-black/5 border-2 border-black/10 flex items-center justify-center text-3xl flex-shrink-0">
           <i class="fa-solid fa-user-doctor text-black/40"></i></div>
         <div>
-          <p class="text-xs text-black/40 font-bold uppercase tracking-widest mb-1">Surgeon Profile</p>
+          <p class="text-xs text-black/40 font-bold uppercase tracking-widest mb-1 font-doto">Surgeon Profile</p>
           <h1 class="font-black text-3xl text-black mb-2" id="profileName">Loading…</h1>
           <div class="flex items-center gap-3 flex-wrap">
             <span class="text-xs text-black/40" id="profileSessions"></span>
@@ -198,11 +210,11 @@
         <div class="ml-auto grid grid-cols-2 gap-4">
           <div class="text-center">
             <p class="font-doto text-3xl font-black text-black" id="profileAvg">—</p>
-            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest">Avg Score</p>
+            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest font-doto">Avg Score</p>
           </div>
           <div class="text-center">
             <p class="font-doto text-3xl font-black text-black" id="profileBest">—</p>
-            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest">Best Score</p>
+            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest font-doto">Best Score</p>
           </div>
         </div>
       </div>
@@ -210,14 +222,14 @@
 
     <!-- Trend Chart -->
     <div class="glass rounded-3xl p-6 mb-6 border border-black/8 shadow-lg">
-      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4"><i
+      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4 font-doto"><i
           class="fa-solid fa-chart-line mr-2"></i>Health Score — Career Trend</h2>
       <div style="height:200px;position:relative"><canvas id="trendChart"></canvas></div>
     </div>
 
     <!-- Session History -->
     <div class="glass rounded-3xl p-6 mb-6 border border-black/8 shadow-lg">
-      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4"><i
+      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4 font-doto"><i
           class="fa-solid fa-clock-rotate-left mr-2"></i>Session History</h2>
       <div id="sessionList" class="flex flex-col gap-2"></div>
     </div>
@@ -225,10 +237,10 @@
     <!-- AI Analysis -->
     <div class="glass rounded-3xl p-6 border border-black/8 shadow-lg" id="aiPanel">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest"><i class="fa-solid fa-robot mr-2"></i>AI
+        <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest font-doto"><i class="fa-solid fa-robot mr-2"></i>AI
           Career Analysis</h2>
         <button onclick="generateAnalysis()" id="analyzeBtn"
-          class="px-5 py-2 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/80 transition-colors flex items-center gap-2">
+          class="px-5 py-2 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/80 transition-colors flex items-center gap-2 font-doto">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Generate
         </button>
       </div>
