@@ -30,7 +30,7 @@
 
   <!-- Preload Profile Images -->
   <link rel="preload" href="assets/logo/images/profile/Seon_Boadita.png" as="image">
-  <link rel="preload" href="assets/logo/images/profile/Prabhu_Hosalli.jpeg" as="image">
+  <link rel="preload" href="assets/logo/images/profile/.jpeg" as="image">
   <link rel="preload" href="assets/logo/images/profile/Gerontius_Rodrigues.png" as="image">
   <link rel="preload" href="assets/logo/images/profile/Varun_Raikar.png" as="image">
 
@@ -407,13 +407,12 @@
     .marquee-wrap {
       overflow: hidden;
       white-space: nowrap;
-      position: relative;
-      z-index: 10;
-      padding: 4rem 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(10px);
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 100%;
+      transform: translateY(calc(-50% + 25px));
+      z-index: 0;
     }
 
     .marquee-track {
@@ -421,7 +420,7 @@
     }
 
     .marquee-track span {
-      font-size: clamp(3rem, 8vw, 6rem);
+      font-size: clamp(4.5rem, 10vw, 8.5rem);
       font-weight: 900;
       letter-spacing: -0.03em;
       padding: 0 2rem;
@@ -431,7 +430,7 @@
     }
 
     .marquee-track span:hover {
-      color: #000;
+      color: rgba(0, 0, 0, 0.2);
       -webkit-text-stroke: 0px;
     }
 
@@ -472,7 +471,19 @@
 
   <!-- HERO -->
   <section class="team-hero">
-    <div class="max-w-7xl mx-auto w-full flex flex-col items-center text-center">
+    <!-- MARQUEE -->
+    <div class="marquee-wrap" id="marquee-section">
+      <div class="marquee-track" id="marquee-track-1">
+        <span>PERFECTION</span><span class="dot">●</span><span>INNOVATION</span><span
+          class="dot">●</span><span>PRECISION</span><span class="dot">●</span><span>SIMULATION</span><span
+          class="dot">●</span>
+        <span>PERFECTION</span><span class="dot">●</span><span>INNOVATION</span><span
+          class="dot">●</span><span>PRECISION</span><span class="dot">●</span><span>SIMULATION</span><span
+          class="dot">●</span>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto w-full flex flex-col items-center text-center relative z-10 pointer-events-none">
       <div class="flex items-center justify-center gap-3 mb-6" id="hero-tag">
         <div class="pulse-dot"></div>
         <span class="text-[10px] text-black/50 tracking-[0.2em] uppercase font-bold font-doto">The Minds Behind The
@@ -480,7 +491,7 @@
       </div>
       <h1 class="font-inter hero-title-wrap" id="hero-title">
         <span class="line"><span class="line-inner">MEET</span></span>
-        <span class="line"><span class="line-inner">THE <span class="text-black/25">TEAM.</span></span></span>
+        <span class="line"><span class="line-inner">THE <span class="text-black">TEAM.</span></span></span>
       </h1>
       <div id="hero-desc" class="mt-4 max-w-md" style="opacity:0;transform:translateY(30px)">
         <p class="text-sm text-black/40 leading-relaxed">Four minds united by one mission — building the future of
@@ -514,8 +525,8 @@
         </div>
         <div class="card-info">
           <div>
-            <p class="name">Seon Boadita</p>
-            <p class="role">Lead Architect</p>
+            <p class="name">Mr. Seon Boadita</p>
+            <p class="role">Team Lead</p>
           </div>
           <span class="num">01</span>
         </div>
@@ -524,7 +535,7 @@
       <!-- Member 2 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Prabhu_Hosalli.jpeg" alt="Prabhu Hosalli" fetchpriority="high"
+          <img src="assets/logo/images/profile/Prabhu_Hosalli.png" alt="Prabhu Hosalli" fetchpriority="high"
             onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
@@ -610,17 +621,7 @@
     </div>
   </section>
 
-  <!-- MARQUEE -->
-  <div class="marquee-wrap mt-10" id="marquee-section">
-    <div class="marquee-track" id="marquee-track-1">
-      <span>PERFECTION</span><span class="dot">●</span><span>INNOVATION</span><span
-        class="dot">●</span><span>PRECISION</span><span class="dot">●</span><span>SIMULATION</span><span
-        class="dot">●</span>
-      <span>PERFECTION</span><span class="dot">●</span><span>INNOVATION</span><span
-        class="dot">●</span><span>PRECISION</span><span class="dot">●</span><span>SIMULATION</span><span
-        class="dot">●</span>
-    </div>
-  </div>
+
   </br>
   </br>
   </br>
