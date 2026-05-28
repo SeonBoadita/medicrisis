@@ -17,7 +17,8 @@ app.use(express.json({ limit: '100mb' }));
 
 const SECRET_KEY      = process.env.SECRET_KEY      || 'vitalrush-super-secret-key';
 const JWT_SECRET      = process.env.JWT_SECRET      || 'vitalrush-jwt-secret';
-const ADMIN_PASSWORD  = process.env.ADMIN_PASSWORD  || 'medicrisis-admin-2026';
+const rawAdmin        = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD  = (rawAdmin !== undefined && rawAdmin !== '') ? rawAdmin.replace(/['"]/g, '').trim() : 'medicrisis-admin-2026';
 const rawGeminiKey    = process.env.GEMINI_API_KEY  || '';
 const GEMINI_API_KEY  = rawGeminiKey.replace(/['"]/g, '').trim();
 const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY || '';

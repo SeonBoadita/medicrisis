@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clinical Demo — mediCrisis VR Surgery Simulation</title>
+  <meta name="description"
+    content="Watch the mediCrisis clinical demo. Experience our immersive VR trauma simulation platform in action. Real-time surgical training redefined.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/ScrollSmoother.min.js"></script>
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { doto: ['Doto'], inter: ['Inter'] } } } }
+  </script>
+
+  <!-- Three.js Import Map -->
+  <script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"}}
+</script>
+
+  <style type="text/tailwindcss">
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html {
+      scroll-behavior: auto
+    }
+
+    body {
+      background: #fff;
+      color: #111;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden
+    }
+
+    ::selection {
+      background: #000;
+      color: #fff;
+    }
+
+    /* ─── VR Surgical Reticle Cursor ─── */
+    * {
+      cursor: none !important;
+    }
+
+    #vr-cursor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 32px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+      transition: width 0.3s, height 0.3s;
+    }
+
+    #vr-cursor .crosshair-x {
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      right: -10px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateY(-50%);
+      transition: all 0.3s;
+    }
+
+    #vr-cursor .crosshair-y {
+      position: absolute;
+      left: 50%;
+      top: -10px;
+      bottom: -10px;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.8);
+      transform: translateX(-50%);
+      transition: all 0.3s;
+    }
+
+    #vr-cursor .brackets {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 4px;
+      clip-path: polygon(0 0, 20% 0, 20% 100%, 0 100%, 0 0, 100% 0, 100% 100%, 80% 100%, 80% 0, 100% 0);
+      transition: all 0.3s;
+    }
+
+    #vr-cursor.hover {
+      width: 48px;
+      height: 48px;
+    }
+
+    #vr-cursor.hover .crosshair-x {
+      left: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 1);
+    }
+
+    #vr-cursor.hover .crosshair-y {
+      top: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 1);
+    }
+
+    #vr-cursor.hover .brackets {
+      border-color: rgba(255, 255, 255, 1);
+      animation: cursorSpin 4s linear infinite;
+    }
+
+    @keyframes cursorSpin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ─── Fixed Three.js Canvas ─── */
+    #three-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0
+    }
+
+    /* ─── Navbar ─── */
+    .navbar {
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: 95%;
+      max-width: 1400px;
+      padding: 1rem 2.5rem;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.001);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-link.active span.relative {
+      color: #000 !important;
+      font-weight: 900;
+    }
+    .nav-link.active div.absolute {
+      transform: translateY(0) !important;
+      background-color: #fff !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .navbar.scrolled {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 0.75rem 2rem;
+    }
+
+    @keyframes shimmer {
+      100% { transform: translateX(150%) skewX(-20deg); }
+    }
+
+    /* ─── Loading Screen ─── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s
+    }
+
+    .loading-lines rect {
+      animation: enterBrain 1.5s infinite ease-in-out;
+    }
+
+    .loading-lines rect:nth-child(even) {
+      animation-delay: 0.7s;
+    }
+
+    @keyframes enterBrain {
+      0% { transform: translateX(-20px); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateX(20px); opacity: 0; }
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* ─── Scroll content wrapper ─── */
+    #smooth-wrapper { position: relative; z-index: 10; }
+
+    /* ─── Demo Page Layout ─── */
+    .demo-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 9rem 2rem 2rem;
+      position: relative;
+    }
+
+    /* Video + details live outside demo-hero, in their own section */
+    .demo-video-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0 2rem 0;
+      position: relative;
+      z-index: 10;
+      width: 100%;
+    }
+
+    /* Eyebrow */
+    .demo-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .eyebrow-line {
+      width: 40px;
+      height: 1.5px;
+      background: #000;
+      opacity: 0.2;
+    }
+
+    /* Hero title — same weight/tracking as homepage */
+    .demo-title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 900;
+      line-height: 0.93;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .demo-title .dim { color: rgba(0,0,0,0.22); }
+    .demo-title .italic { font-style: italic; }
+
+    .demo-subtitle {
+      font-size: 0.95rem;
+      color: rgba(0,0,0,0.4);
+      text-align: center;
+      max-width: 440px;
+      line-height: 1.75;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+    }
+
+    /* ─── Video outer wrap (holds glow canvas + shell) ─── */
+    .video-outer {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* Glow / dissolve canvas behind the video */
+    #vid-glow-canvas {
+      position: absolute;
+      inset: -40px;
+      width: calc(100% + 80px);
+      height: calc(100% + 80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Video wrapper / player ─── */
+    .video-shell {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #000;
+      /* Premium bright bezel to frame the dark video against the white grid */
+      border: 8px solid rgba(255, 255, 255, 0.85);
+      box-shadow:
+        0 30px 60px rgba(0,0,0,0.15),
+        0 4px 12px rgba(0,0,0,0.05),
+        0 0 0 1px rgba(0,0,0,0.05) inset;
+    }
+
+    /* ─── Fullscreen: keep vr-cursor visible ─── */
+    #video-shell:fullscreen #vr-cursor,
+    #video-shell:-webkit-full-screen #vr-cursor {
+      display: block !important;
+    }
+    /* Allow default cursor in fullscreen as fallback */
+    #video-shell:fullscreen,
+    #video-shell:-webkit-full-screen {
+      cursor: default !important;
+    }
+    #video-shell:fullscreen *,
+    #video-shell:-webkit-full-screen * {
+      cursor: default !important;
+    }
+
+    .video-shell video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* HUD corner brackets — white on dark video */
+    .vid-corner {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      z-index: 8;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+    .vid-corner.tl { top: 14px; left: 14px; border-top: 1.5px solid #fff; border-left: 1.5px solid #fff; }
+    .vid-corner.tr { top: 14px; right: 14px; border-top: 1.5px solid #fff; border-right: 1.5px solid #fff; }
+    .vid-corner.bl { bottom: 14px; left: 14px; border-bottom: 1.5px solid #fff; border-left: 1.5px solid #fff; }
+    .vid-corner.br { bottom: 14px; right: 14px; border-bottom: 1.5px solid #fff; border-right: 1.5px solid #fff; }
+
+    /* ─── Pre-play overlay ─── */
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      background: rgba(0,0,0,0.38);
+      backdrop-filter: blur(2px);
+      transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), visibility 0.5s;
+    }
+
+    .video-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    /* scan-line texture on overlay */
+    .overlay-scanlines {
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.015) 3px,
+        rgba(0,0,0,0.015) 4px
+      );
+      pointer-events: none;
+    }
+
+    /* Ripple rings — white on dark */
+    .ripple-ring {
+      position: absolute;
+      width: 84px;
+      height: 84px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 50%;
+      animation: rippleExpand 2.8s cubic-bezier(0.16,1,0.3,1) infinite;
+    }
+    .ripple-ring:nth-child(2) { animation-delay: 0.7s; }
+    .ripple-ring:nth-child(3) { animation-delay: 1.4s; }
+
+    @keyframes rippleExpand {
+      0%   { transform: scale(1); opacity: 0.6; }
+      100% { transform: scale(2.8); opacity: 0; }
+    }
+
+    /* Play button */
+    .play-btn-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
+
+    .play-btn {
+      position: relative;
+      z-index: 2;
+      width: 76px;
+      height: 76px;
+      background: #000;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.4rem;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 0 0 0 rgba(0,0,0,0.08);
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 0 0 16px rgba(0,0,0,0.05);
+    }
+
+    .play-btn i { margin-left: 5px; }
+
+    .overlay-label {
+      font-family: 'Doto', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* HUD data labels — white on dark video */
+    .hud-lbl {
+      position: absolute;
+      font-family: 'Doto', monospace;
+      font-size: 0.52rem;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+    }
+    .hud-lbl.tl { top: 18px; left: 18px; }
+    .hud-lbl.tr { top: 18px; right: 18px; }
+    .hud-lbl.bl { bottom: 18px; left: 18px; }
+    .hud-lbl.br { bottom: 18px; right: 18px; }
+
+    /* Pulse badge — visible on dark overlay */
+    .hud-status {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      padding: 0.3rem 0.8rem;
+      font-family: 'Doto', monospace;
+      font-size: 0.58rem;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.75);
+      white-space: nowrap;
+    }
+
+    .pulse-dot {
+      width: 6px; height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      animation: pulseDot 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.25; }
+    }
+
+    /* ─── Custom Controls Bar ─── */
+    .vid-controls {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 7;
+      padding: 2.5rem 1.5rem 1.25rem;
+      background: linear-gradient(to top, rgba(255,255,255,0.7) 0%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .video-shell:hover .vid-controls,
+    .vid-controls.pinned {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Progress bar */
+    .progress-track {
+      position: relative;
+      height: 3px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 3px;
+      cursor: pointer;
+      transition: height 0.15s;
+    }
+    .progress-track:hover { height: 5px; }
+
+    .progress-fill {
+      height: 100%;
+      background: #000;
+      border-radius: inherit;
+      width: 0%;
+      position: relative;
+      pointer-events: none;
+    }
+
+    .progress-thumb {
+      position: absolute;
+      right: -5px; top: 50%;
+      transform: translateY(-50%) scale(0);
+      width: 11px; height: 11px;
+      background: #000;
+      border-radius: 50%;
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .progress-track:hover .progress-thumb { transform: translateY(-50%) scale(1); }
+
+    /* Controls row */
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ctrl-left, .ctrl-right {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .c-btn {
+      background: none;
+      border: none;
+      color: rgba(0,0,0,0.45);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.4rem;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+      line-height: 1;
+    }
+    .c-btn:hover { color: #000; background: rgba(0,0,0,0.05); }
+    .c-btn.main { font-size: 0.95rem; color: #000; }
+
+    .time-lbl {
+      font-family: 'Doto', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: rgba(0,0,0,0.35);
+    }
+
+    .vol-row { display: flex; align-items: center; gap: 0.45rem; }
+
+    .vol-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 60px; height: 2px;
+      background: rgba(0,0,0,0.15);
+      border-radius: 2px;
+      outline: none;
+    }
+    .vol-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 9px; height: 9px;
+      background: #000;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .qual-badge {
+      font-family: 'Doto', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      color: rgba(0,0,0,0.3);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 4px;
+      padding: 0.12rem 0.4rem;
+    }
+
+    /* ─── CTA strip ─── */
+    .demo-cta {
+      padding: 2rem 2rem 5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.75rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .cta-title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .cta-title .dim { color: rgba(0,0,0,0.22); }
+
+    .cta-sub {
+      font-size: 0.9rem;
+      color: rgba(0,0,0,0.4);
+      text-align: center;
+    }
+
+    .cta-btns {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Same button style as homepage */
+    .cta-primary {
+      background: #000;
+      color: #fff;
+      padding: 0.875rem 1.75rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.3s, box-shadow 0.3s, transform 0.3s;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    .cta-primary:hover { background: rgba(0,0,0,0.8); transform: scale(1.04); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+
+    .cta-ghost {
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,0,0,0.1);
+      color: rgba(0,0,0,0.55);
+      padding: 0.875rem 1.75rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      backdrop-filter: blur(8px);
+      transition: background 0.3s, color 0.3s;
+    }
+    .cta-ghost:hover { background: rgba(255,255,255,0.85); color: #000; }
+
+    /* ─── Scroll indicator (same as homepage) ─── */
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(0, 0, 0, 0.3);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif
+    }
+
+    .scroll-indicator .mouse {
+      width: 22px;
+      height: 34px;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      border-radius: 11px;
+      position: relative
+    }
+
+    .scroll-indicator .mouse::after {
+      content: '';
+      width: 3px; height: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 2px;
+      position: absolute;
+      top: 6px; left: 50%;
+      transform: translateX(-50%);
+      animation: scrollDot 1.8s ease-in-out infinite
+    }
+
+    @keyframes scrollDot {
+      0%, 100% { opacity: 1; transform: translateX(-50%) translateY(0) }
+      50% { opacity: 0.3; transform: translateX(-50%) translateY(8px) }
+    }
+
+    /* ─── Glass card (same as stat-card on homepage) ─── */
+    .glass-card {
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 1.25rem;
+    }
+
+    @media (max-width: 768px) {
+      .demo-title { font-size: clamp(2.5rem, 10vw, 4rem); }
+      .video-shell { border-radius: 12px; }
+      .hud-lbl.tr, .hud-lbl.br { display: none; }
+      .vol-row { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- VR Cursor -->
+  <div id="vr-cursor">
+    <div class="crosshair-x"></div>
+    <div class="crosshair-y"></div>
+    <div class="brackets"></div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loader">
+    <svg width="100" height="100" viewBox="0 0 202 179" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-4">
+      <g class="loading-lines">
+        <rect x="34.5" y="91.4995" width="12" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="14.5" y="91.4995" width="17" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="49.5" y="91.4995" width="20" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="72.5" y="91.4995" width="5" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="80.5" y="91.4995" width="11" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="94.5" y="91.4995" width="4" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="13.9609" y="79.8452" width="90" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="13.9609" y="79.8452" width="90" height="4" rx="1.5" fill="#000" stroke="#000" />
+        <rect x="140.961" y="126.845" width="37" height="5" fill="#000" stroke="#000" />
+        <rect x="140.961" y="59.8452" width="37" height="5" fill="#000" stroke="#000" />
+        <rect x="137.961" y="82.8452" width="6" height="28" rx="1.5" fill="#000" fill-opacity="0.5" stroke="#000" />
+      </g>
+      <g>
+        <path d="M16.4609 104.845H102.961V110.845H14.9609V106.345C14.9609 105.517 15.6325 104.845 16.4609 104.845Z"
+          fill="#000" stroke="#000" />
+        <path d="M17.4922 110.345C21.4031 137.476 46.1752 136.633 47.4379 136.515" stroke="#000" stroke-width="6" />
+        <path d="M75.4346 110.345C71.5236 137.476 46.7515 136.633 45.4889 136.515" stroke="#000" stroke-width="6" />
+        <path d="M52.9609 40.8452C30.9609 26.8452 14.0765 49.2365 13.4609 50.3452" stroke="#000" stroke-width="6" />
+        <path d="M15.9609 81.8452C-0.539062 66.3452 13.9609 49.3452 15.9609 47.3452" stroke="#000" stroke-width="6" />
+        <path d="M83.4592 33.3452C75.4595 7.8452 42.4592 16.8452 31.4591 37.3452" stroke="#000" stroke-width="6" />
+        <path d="M99.9601 53.8452C139.96 23.8452 83.46 -1.15475 67.46 17.3452" stroke="#000" stroke-width="6" />
+        <path d="M128.959 45.8454C164.96 38.8454 123.46 2.84538 104.007 17.6908" stroke="#000" stroke-width="6" />
+        <path d="M168.96 59.3452C168.96 51.3454 156.828 31.8451 144.46 31.8452" stroke="#000" stroke-width="6" />
+        <path d="M143.46 62.3453C91.9604 53.3453 86.4602 136.845 142.96 129.345" stroke="#000" stroke-width="6" />
+        <path d="M89.9605 129.345C85.9604 162.345 143.96 174.345 149.461 166.345" stroke="#000" stroke-width="6" />
+        <path d="M148.46 167.345C158.46 159.345 160.96 141.845 160.96 131.345" stroke="#000" stroke-width="6" />
+        <path d="M176.461 129.345C189.461 131.845 188.961 62.3452 177.461 62.3452" stroke="#000" stroke-width="6" />
+        <path d="M149.96 62.3453C107.51 58.1256 107.01 134.611 149.96 129.345" stroke="#000" stroke-width="6" />
+        <path d="M100.46 58.8453C98.459 54.8453 90.4588 37.8454 67.4601 48.3453M52.46 66.3453C50.96 53.8453 28.96 54.8453 23.4606 65.3453M86.9599 80.8454C85.9599 68.8454 80.4599 64.3454 75.9598 61.8454"
+          stroke="#000" stroke-width="6" />
+        <path d="M54.9609 138.845V170.345C54.9609 171.173 54.2894 171.845 53.4609 171.845H50.4609C49.6325 171.845 48.9609 171.173 48.9609 170.345V138.845H54.9609Z"
+          fill="#000" stroke="#000" />
+      </g>
+    </svg>
+    <p class="font-doto text-black/40 text-sm tracking-widest">LOADING SIMULATION</p>
+  </div>
+
+  <!-- Three.js Canvas (same as homepage) -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- Navbar (exact same component) -->
+  <medicrisis-navbar></medicrisis-navbar>
+
+  <!-- ═══ SCROLLABLE CONTENT ═══ -->
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+
+      <!-- ─── HERO SECTION ─── -->
+      <!-- ── HERO TEXT ── -->
+      <section class="demo-hero" id="demo-hero">
+
+        <!-- Eyebrow -->
+        <div class="demo-eyebrow" id="demo-eyebrow">
+          <div class="eyebrow-line"></div>
+          <span class="font-doto text-[0.6rem] tracking-[0.22em] text-black/40 uppercase">mediCrisis — Clinical Demo v2.0</span>
+          <div class="eyebrow-line"></div>
+        </div>
+
+        <!-- Title -->
+        <h1 class="demo-title" id="demo-title">
+          WATCH THE<br>
+          <span class="italic">FUTURE</span> <span class="dim">OF</span><br>
+          SURGERY
+        </h1>
+
+        <!-- Subtitle -->
+        <p class="demo-subtitle" id="demo-subtitle">
+          A full walkthrough of our immersive VR trauma simulation — from patient intake to post-operative scoring.
+        </p>
+
+      </section>
+
+      <!-- ── VIDEO + DETAILS ── -->
+      <div class="demo-video-section" id="demo-video-section">
+        <div class="video-outer" id="video-outer">
+
+          <!-- GLSL dissolve glow canvas -->
+          <canvas id="vid-glow-canvas" aria-hidden="true"></canvas>
+
+          <div class="video-shell" id="video-shell">
+
+          <!-- The video -->
+          <video id="demo-video" preload="metadata" playsinline>
+            <source src="assets/logo/video/testVideo.mp4" type="video/mp4">
+          </video>
+
+          <!-- HUD corner brackets -->
+          <div class="vid-corner tl" aria-hidden="true"></div>
+          <div class="vid-corner tr" aria-hidden="true"></div>
+          <div class="vid-corner bl" aria-hidden="true"></div>
+          <div class="vid-corner br" aria-hidden="true"></div>
+
+          <!-- Pre-play overlay -->
+          <div class="video-overlay" id="video-overlay">
+            <div class="overlay-scanlines" aria-hidden="true"></div>
+
+            <!-- HUD labels -->
+            <span class="hud-lbl tl">SIM_ENV :: OR-07</span>
+            <span class="hud-lbl tr">DATE :: 2026.05.28</span>
+            <span class="hud-lbl bl">CASE :: DEMO_04</span>
+            <span class="hud-lbl br">INTEGRITY :: 98.2%</span>
+
+            <div class="hud-status">
+              <span class="pulse-dot"></span>
+              DEMO READY
+            </div>
+
+            <!-- Ripple + play -->
+            <div class="play-btn-wrap">
+              <span class="ripple-ring" aria-hidden="true"></span>
+              <span class="ripple-ring" aria-hidden="true"></span>
+              <span class="ripple-ring" aria-hidden="true"></span>
+              <button class="play-btn magnetic-btn" id="overlay-play-btn" aria-label="Play clinical demo">
+                <i class="fa-solid fa-play"></i>
+              </button>
+            </div>
+
+            <span class="overlay-label">Click to Begin Simulation</span>
+          </div>
+
+          <!-- Custom controls -->
+          <div class="vid-controls" id="vid-controls">
+            <!-- Progress -->
+            <div class="progress-track" id="progress-track">
+              <div class="progress-fill" id="progress-fill">
+                <div class="progress-thumb"></div>
+              </div>
+            </div>
+            <!-- Row -->
+            <div class="ctrl-row">
+              <div class="ctrl-left">
+                <button class="c-btn main" id="pp-btn" aria-label="Play / Pause">
+                  <i class="fa-solid fa-play" id="pp-icon"></i>
+                </button>
+                <div class="vol-row">
+                  <button class="c-btn" id="mute-btn" aria-label="Mute">
+                    <i class="fa-solid fa-volume-high" id="vol-icon"></i>
+                  </button>
+                  <input type="range" class="vol-range" id="vol-range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                </div>
+                <span class="time-lbl" id="time-lbl">0:00 / 0:00</span>
+              </div>
+              <div class="ctrl-right">
+                <span class="qual-badge">MP4 · HD</span>
+                <button class="c-btn" id="pip-btn" title="Picture in Picture" aria-label="Picture in Picture">
+                  <i class="fa-solid fa-display"></i>
+                </button>
+                <button class="c-btn" id="fs-btn" aria-label="Fullscreen">
+                  <i class="fa-solid fa-expand" id="fs-icon"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          </div><!-- /video-shell -->
+        </div><!-- /video-outer -->
+
+      </div><!-- /demo-video-section -->
+
+      <!-- ─── CTA SECTION ─── -->
+      <section class="demo-cta" id="demo-cta">
+        <div class="flex items-center gap-3 mb-2" id="cta-eyebrow">
+          <div class="pulse-dot" style="background:#111;"></div>
+          <p class="text-xs text-black/40 tracking-widest uppercase font-semibold font-doto">Ready to Begin?</p>
+        </div>
+        <h2 class="cta-title" id="cta-title">
+          Ready to<br><span class="dim">Operate?</span>
+        </h2>
+        <p class="cta-sub" id="cta-sub">Put on the headset. Pick up the scalpel.<br>Your patient is waiting.</p>
+        <div class="cta-btns" id="cta-btns">
+          <a href="leaderboard.html" class="cta-primary magnetic-btn" id="cta-leaderboard">
+            <i class="fa-solid fa-ranking-star text-xs"></i>
+            View Live Leaderboard
+          </a>
+          <a href="index.html" class="cta-ghost magnetic-btn" id="cta-home">
+            <i class="fa-solid fa-house text-xs"></i>
+            Back to Home
+          </a>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="navbar.js"></script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    /* ═══════════════════════════════════════════
+       GRID GLSL SHADER — identical to main.js
+    ═══════════════════════════════════════════ */
+    const gridVS = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position,1.0);}`;
+    const gridFS = `
+uniform float uTime; uniform vec2 uMouse,uResolution; varying vec2 vUv;
+void main(){
+  float a=uResolution.x/uResolution.y, gs=35.0;
+  vec2 uv=vec2(vUv.x*a,vUv.y)*gs;
+  vec2 mg=vec2((uMouse.x*.5+.5)*a,uMouse.y*.5+.5)*gs;
+  vec2 cid=floor(uv), cc=cid+.5;
+  float dm=distance(cc,mg);
+  float wave=sin(dm*1.2-uTime*3.)*.06*smoothstep(12.,0.,dm);
+  float push=smoothstep(8.,0.,dm);
+  vec2 pd=normalize(cc-mg+.001);
+  vec2 cl=fract(uv)-pd*push*.18-pd*wave;
+  float hs=(.85-push*.2)*.5, bw=.025;
+  vec2 fc=abs(cl-.5);
+  float o=step(fc.x,hs)*step(fc.y,hs)-step(fc.x,hs-bw)*step(fc.y,hs-bw);
+  vec3 bg=vec3(1.);
+  vec3 ln=vec3(0.);
+  float la=0.5+push*.5;
+  gl_FragColor=vec4(mix(bg,ln,o*la),1.);
+}`;
+
+    let scene, camera, renderer, gridMesh, gridRT, bgScene, bgCamera;
+    let mouse = new THREE.Vector2(0, 0), mouseSpeed = 0;
+    let clock = new THREE.Clock();
+
+    function initThree() {
+      const canvas = document.getElementById('three-canvas');
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+      gridRT = new THREE.WebGLRenderTarget(innerWidth, innerHeight);
+
+      // BG scene with grid shader
+      bgScene  = new THREE.Scene();
+      bgCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+      const gridMat = new THREE.ShaderMaterial({
+        vertexShader: gridVS,
+        fragmentShader: gridFS,
+        uniforms: {
+          uTime:       { value: 0 },
+          uMouse:      { value: new THREE.Vector2() },
+          uResolution: { value: new THREE.Vector2(innerWidth, innerHeight) }
+        },
+        depthWrite: false, depthTest: false
+      });
+      gridMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), gridMat);
+      gridMesh.frustumCulled = false;
+      bgScene.add(gridMesh);
+
+      // Main scene — transparent so grid shows through
+      scene  = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 2000);
+      camera.position.set(0, 0, 5);
+
+      window.addEventListener('resize', () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
+        gridMesh.material.uniforms.uResolution.value.set(innerWidth, innerHeight);
+        gridRT.setSize(innerWidth, innerHeight);
+      });
+    }
+
+    function animateThree() {
+      requestAnimationFrame(animateThree);
+      const t = clock.getElapsedTime();
+      gridMesh.material.uniforms.uTime.value  = t;
+      gridMesh.material.uniforms.uMouse.value.copy(mouse);
+      renderer.setRenderTarget(gridRT);
+      renderer.render(bgScene, bgCamera);
+      renderer.setRenderTarget(null);
+      scene.background = gridRT.texture;
+      renderer.render(scene, camera);
+    }
+
+    /* ═══════════════════════════════════════════
+       VR CURSOR — identical to main.js
+    ═══════════════════════════════════════════ */
+    const vrCursor = document.getElementById('vr-cursor');
+    let cx = 0, cy = 0;
+
+    window.addEventListener('mousemove', e => {
+      mouse.x = (e.clientX / innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+      mouseSpeed = Math.min(Math.abs(e.movementX) + Math.abs(e.movementY), 50);
+      cx = e.clientX; cy = e.clientY;
+    });
+
+    /* ═══════════════════════════════════════════
+       GSAP + SCROLL
+    ═══════════════════════════════════════════ */
+    gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
+
+    const smoother = ScrollSmoother.create({
+      wrapper: '#smooth-wrapper',
+      content: '#smooth-content',
+      smooth: 2,
+      effects: true
+    });
+
+    gsap.ticker.add(() => {
+      gsap.set(vrCursor, { x: cx, y: cy });
+    });
+
+    /* ─── Cursor hover states ─── */
+    function bindCursorHovers(root) {
+      root.querySelectorAll('a, button, .magnetic-btn, .feature-card').forEach(el => {
+        el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
+        el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
+      });
+    }
+    bindCursorHovers(document);
+
+    /* ─── Magnetic buttons ─── */
+    function bindMagnetic(root) {
+      root.querySelectorAll('.magnetic-btn').forEach(btn => {
+        btn.addEventListener('mousemove', e => {
+          const r = btn.getBoundingClientRect();
+          const x = e.clientX - r.left - r.width / 2;
+          const y = e.clientY - r.top - r.height / 2;
+          gsap.to(btn, { x: x * 0.4, y: y * 0.4, duration: 0.4, ease: 'power3.out' });
+        });
+        btn.addEventListener('mouseleave', () => {
+          gsap.to(btn, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1,0.3)' });
+        });
+      });
+    }
+    bindMagnetic(document);
+
+    /* ─── Navbar scroll state ─── */
+    ScrollTrigger.create({
+      start: 80,
+      onUpdate: s => { document.getElementById('navbar')?.classList.toggle('scrolled', s.scroll() > 80); }
+    });
+
+    /* ─── GSAP — page entrance ─── */
+    gsap.set('#demo-eyebrow',  { opacity: 0, y: 20 });
+    gsap.set('#demo-title',    { opacity: 0, y: 40, rotationX: -15, transformOrigin: 'center bottom', transformStyle: 'preserve-3d' });
+    gsap.set('#demo-subtitle', { opacity: 0, y: 20 });
+    gsap.set('#video-outer',   { opacity: 0, y: 50, scale: 0.97 });
+    gsap.set('#demo-cta',      { opacity: 0, y: 40 });
+
+    const enterTl = gsap.timeline({ delay: 0.25 });
+    enterTl
+      .to('#demo-eyebrow',  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+      .to('#demo-title',    { opacity: 1, y: 0, rotationX: 0, duration: 0.95, ease: 'power3.out' }, '-=0.45')
+      .to('#demo-subtitle', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }, '-=0.55')
+      .to('#video-outer',   { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power3.out' }, '-=0.45');
+
+    // Scroll scrub — CTA reveal
+    gsap.to('#demo-cta', {
+      opacity: 1, y: 0,
+      ease: 'power3.out',
+      scrollTrigger: { trigger: '#demo-cta', start: 'top 85%', end: 'top 50%', scrub: 1 }
+    });
+
+    // Scroll scrub — video parallax lift
+    gsap.to('#video-outer', {
+      y: -20,
+      ease: 'none',
+      scrollTrigger: { trigger: '#demo-video-section', start: 'top 80%', end: 'bottom top', scrub: 2 }
+    });
+
+    /* ═══════════════════════════════════════════
+       VIDEO PLAYER LOGIC
+    ═══════════════════════════════════════════ */
+    const video       = document.getElementById('demo-video');
+    const overlay     = document.getElementById('video-overlay');
+    const controls    = document.getElementById('vid-controls');
+    const overlayBtn  = document.getElementById('overlay-play-btn');
+    const ppBtn       = document.getElementById('pp-btn');
+    const ppIcon      = document.getElementById('pp-icon');
+    const progressTrk = document.getElementById('progress-track');
+    const progressFil = document.getElementById('progress-fill');
+    const timeLbl     = document.getElementById('time-lbl');
+    const muteBtn     = document.getElementById('mute-btn');
+    const volIcon     = document.getElementById('vol-icon');
+    const volRange    = document.getElementById('vol-range');
+    const pipBtn      = document.getElementById('pip-btn');
+    const fsBtn       = document.getElementById('fs-btn');
+    const fsIcon      = document.getElementById('fs-icon');
+
+    const fmt = s => { const m = Math.floor(s/60), sec = Math.floor(s%60); return m+':'+(sec<10?'0':'')+sec; };
+
+    function setPlay(playing) {
+      ppIcon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+    }
+
+    overlayBtn.addEventListener('click', () => {
+      overlay.classList.add('hidden');
+      controls.classList.add('pinned');
+      video.play().then(() => {
+        setPlay(true);
+        setTimeout(() => controls.classList.remove('pinned'), 2800);
+      });
+    });
+
+    ppBtn.addEventListener('click', () => {
+      if (video.paused) { video.play(); setPlay(true); }
+      else { video.pause(); setPlay(false); }
+    });
+
+    // Click on video body
+    document.getElementById('video-shell').addEventListener('click', e => {
+      if (overlay.classList.contains('hidden') && !e.target.closest('.vid-controls')) {
+        if (video.paused) { video.play(); setPlay(true); }
+        else { video.pause(); setPlay(false); }
+      }
+    });
+
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      progressFil.style.width = (video.currentTime / video.duration * 100) + '%';
+      timeLbl.textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration);
+    });
+
+    video.addEventListener('ended', () => {
+      setPlay(false);
+      overlay.classList.remove('hidden');
+      controls.classList.remove('pinned');
+      video.currentTime = 0;
+    });
+
+    // Scrub
+    let dragging = false;
+    const scrub = e => {
+      const r = progressTrk.getBoundingClientRect();
+      video.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * video.duration;
+    };
+    progressTrk.addEventListener('mousedown', e => { dragging = true; scrub(e); });
+    document.addEventListener('mousemove', e => { if (dragging) scrub(e); });
+    document.addEventListener('mouseup', () => { dragging = false; });
+
+    // Volume
+    volRange.addEventListener('input', () => {
+      video.volume = parseFloat(volRange.value);
+      video.muted = video.volume === 0;
+      updateVolIcon();
+    });
+    muteBtn.addEventListener('click', () => {
+      video.muted = !video.muted;
+      volRange.value = video.muted ? 0 : video.volume;
+      updateVolIcon();
+    });
+    function updateVolIcon() {
+      volIcon.className = video.muted || video.volume === 0
+        ? 'fa-solid fa-volume-xmark'
+        : video.volume < 0.5 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high';
+    }
+
+    // PiP
+    pipBtn.addEventListener('click', async () => {
+      try {
+        document.pictureInPictureElement
+          ? await document.exitPictureInPicture()
+          : await video.requestPictureInPicture();
+      } catch {}
+    });
+
+    // Fullscreen — move vr-cursor into shell so it renders inside fullscreen viewport
+    const shell = document.getElementById('video-shell');
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        shell.requestFullscreen().catch(() => {});
+        fsIcon.className = 'fa-solid fa-compress';
+      } else {
+        document.exitFullscreen();
+        fsIcon.className = 'fa-solid fa-expand';
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (document.fullscreenElement === shell) {
+        // Reparent cursor into the fullscreen element so it paints on top
+        shell.appendChild(vrCursor);
+        fsIcon.className = 'fa-solid fa-compress';
+      } else {
+        // Restore cursor to body
+        document.body.appendChild(vrCursor);
+        fsIcon.className = 'fa-solid fa-expand';
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.code === 'Space')       { e.preventDefault(); ppBtn.click(); }
+      if (e.code === 'KeyF')        fsBtn.click();
+      if (e.code === 'KeyM')        muteBtn.click();
+      if (e.code === 'ArrowRight')  video.currentTime = Math.min(video.duration, video.currentTime + 5);
+      if (e.code === 'ArrowLeft')   video.currentTime = Math.max(0, video.currentTime - 5);
+    });
+
+    /* ═══════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════ */
+    initThree();
+    animateThree();
+
+    // Fade out loader
+    gsap.to('#loader', {
+      opacity: 0, duration: 0.8, delay: 0.3, ease: 'power2.inOut',
+      onComplete: () => { document.getElementById('loader').style.display = 'none'; }
+    });
+
+    // Re-bind nav hover after web component renders
+    setTimeout(() => {
+      bindCursorHovers(document);
+      bindMagnetic(document);
+    }, 300);
+  </script>
+</body>
+</html>

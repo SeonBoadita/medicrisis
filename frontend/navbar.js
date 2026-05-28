@@ -15,6 +15,7 @@ class MedicrisisNavbar extends HTMLElement {
     const isTeam = currentPath.endsWith('team.html');
     const isLeaderboard = currentPath.endsWith('leaderboard.html');
     const isAdmin = currentPath.endsWith('admin.html');
+    const isDemo = currentPath.endsWith('demo.html');
     
     // Grab any custom content the user put inside the tag
     const customContent = this.innerHTML.trim();
@@ -49,21 +50,21 @@ class MedicrisisNavbar extends HTMLElement {
         </div>
         
         <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-          <a href="index.html" class="nav-link ${isHome ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
+          <a href="index.html" class="nav-link ${isHome ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">Home</span>
-            <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="team.html" class="nav-link ${isTeam ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
+          <a href="team.html" class="nav-link ${isTeam ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">The Team</span>
-            <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="leaderboard.html" class="nav-link ${isLeaderboard ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
+          <a href="leaderboard.html" class="nav-link ${isLeaderboard ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10">Leaderboard</span>
-            <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
-          <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-black transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
+          <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
             <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
-            <div class="absolute inset-0 bg-white/80 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
           </a>
         </div>
         
