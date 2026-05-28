@@ -63,7 +63,7 @@
       pointer-events: none;
       z-index: 9999;
       transform: translate(-50%, -50%);
-      mix-blend-mode: difference;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
       transition: width 0.3s, height 0.3s;
     }
 
@@ -287,6 +287,19 @@
       z-index: 0;
     }
 
+    /* ─── Stacked shadow cards ─── */
+    .vid-shadow-card {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.2), 0 8px 16px rgba(0,0,0,0.1);
+      z-index: 0;
+    }
+
     /* ─── Video wrapper / player ─── */
     .video-shell {
       position: relative;
@@ -479,7 +492,7 @@
       bottom: 0; left: 0; right: 0;
       z-index: 7;
       padding: 2.5rem 1.5rem 1.25rem;
-      background: linear-gradient(to top, rgba(255,255,255,0.7) 0%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
       display: flex;
       flex-direction: column;
       gap: 0.65rem;
@@ -498,7 +511,7 @@
     .progress-track {
       position: relative;
       height: 3px;
-      background: rgba(0,0,0,0.1);
+      background: rgba(255,255,255,0.2);
       border-radius: 3px;
       cursor: pointer;
       transition: height 0.15s;
@@ -507,7 +520,7 @@
 
     .progress-fill {
       height: 100%;
-      background: #000;
+      background: #fff;
       border-radius: inherit;
       width: 0%;
       position: relative;
@@ -519,7 +532,7 @@
       right: -5px; top: 50%;
       transform: translateY(-50%) scale(0);
       width: 11px; height: 11px;
-      background: #000;
+      background: #fff;
       border-radius: 50%;
       pointer-events: none;
       transition: transform 0.2s;
@@ -542,21 +555,21 @@
     .c-btn {
       background: none;
       border: none;
-      color: rgba(0,0,0,0.45);
+      color: rgba(255,255,255,0.6);
       font-size: 0.8rem;
       padding: 0.3rem 0.4rem;
       border-radius: 6px;
       transition: color 0.2s, background 0.2s;
       line-height: 1;
     }
-    .c-btn:hover { color: #000; background: rgba(0,0,0,0.05); }
-    .c-btn.main { font-size: 0.95rem; color: #000; }
+    .c-btn:hover { color: #fff; background: rgba(255,255,255,0.15); }
+    .c-btn.main { font-size: 0.95rem; color: #fff; }
 
     .time-lbl {
       font-family: 'Doto', monospace;
       font-size: 0.6rem;
       letter-spacing: 0.1em;
-      color: rgba(0,0,0,0.35);
+      color: rgba(255,255,255,0.6);
     }
 
     .vol-row { display: flex; align-items: center; gap: 0.45rem; }
@@ -565,14 +578,14 @@
       -webkit-appearance: none;
       appearance: none;
       width: 60px; height: 2px;
-      background: rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.25);
       border-radius: 2px;
       outline: none;
     }
     .vol-range::-webkit-slider-thumb {
       -webkit-appearance: none;
       width: 9px; height: 9px;
-      background: #000;
+      background: #fff;
       border-radius: 50%;
       cursor: pointer;
     }
@@ -581,8 +594,8 @@
       font-family: 'Doto', monospace;
       font-size: 0.55rem;
       letter-spacing: 0.1em;
-      color: rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
+      color: rgba(255,255,255,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 4px;
       padding: 0.12rem 0.4rem;
     }
@@ -804,10 +817,14 @@
           <!-- GLSL dissolve glow canvas -->
           <canvas id="vid-glow-canvas" aria-hidden="true"></canvas>
 
+          <!-- Stacked shadow cards behind video -->
+          <div class="vid-shadow-card card-2" id="vid-shadow-2"></div>
+          <div class="vid-shadow-card card-1" id="vid-shadow-1"></div>
+
           <div class="video-shell" id="video-shell">
 
           <!-- The video -->
-          <video id="demo-video" preload="metadata" playsinline>
+          <video id="demo-video" preload="metadata" playsinline poster="assets/logo/video/thumbnail/thumbnail.png">
             <source src="assets/logo/video/testVideo.mp4" type="video/mp4">
           </video>
 
@@ -933,7 +950,7 @@ void main(){
   float o=step(fc.x,hs)*step(fc.y,hs)-step(fc.x,hs-bw)*step(fc.y,hs-bw);
   vec3 bg=vec3(1.);
   vec3 ln=vec3(0.);
-  float la=0.5+push*.5;
+  float la=0.15+push*.7; /* Reduced base alpha, much brighter on hover (push) */
   gl_FragColor=vec4(mix(bg,ln,o*la),1.);
 }`;
 
@@ -942,11 +959,16 @@ void main(){
     let clock = new THREE.Clock();
 
     function initThree() {
-      const canvas = document.getElementById('three-canvas');
-      renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-      renderer.setSize(innerWidth, innerHeight);
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
-      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      try {
+        const canvas = document.getElementById('three-canvas');
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(innerWidth, innerHeight);
+        renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+      } catch (e) {
+        console.warn("WebGL initialization failed, falling back to CSS rendering", e);
+        return;
+      }
 
       gridRT = new THREE.WebGLRenderTarget(innerWidth, innerHeight);
 
@@ -984,6 +1006,7 @@ void main(){
 
     function animateThree() {
       requestAnimationFrame(animateThree);
+      if (!renderer) return;
       const t = clock.getElapsedTime();
       gridMesh.material.uniforms.uTime.value  = t;
       gridMesh.material.uniforms.uMouse.value.copy(mouse);
@@ -1058,15 +1081,34 @@ void main(){
     gsap.set('#demo-eyebrow',  { opacity: 0, y: 20 });
     gsap.set('#demo-title',    { opacity: 0, y: 40, rotationX: -15, transformOrigin: 'center bottom', transformStyle: 'preserve-3d' });
     gsap.set('#demo-subtitle', { opacity: 0, y: 20 });
-    gsap.set('#video-outer',   { opacity: 0, y: 50, scale: 0.97 });
     gsap.set('#demo-cta',      { opacity: 0, y: 40 });
 
     const enterTl = gsap.timeline({ delay: 0.25 });
     enterTl
       .to('#demo-eyebrow',  { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
       .to('#demo-title',    { opacity: 1, y: 0, rotationX: 0, duration: 0.95, ease: 'power3.out' }, '-=0.45')
-      .to('#demo-subtitle', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }, '-=0.55')
-      .to('#video-outer',   { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power3.out' }, '-=0.45');
+      .to('#demo-subtitle', { opacity: 1, y: 0, duration: 0.65, ease: 'power3.out' }, '-=0.55');
+
+    /* ─── Shadow Cards Scroll Reveal ─── */
+    gsap.set('#vid-shadow-1', { rotation: 0, x: 0, y: 0 });
+    gsap.set('#vid-shadow-2', { rotation: 0, x: 0, y: 0 });
+    
+    ScrollTrigger.create({
+      trigger: '#video-outer',
+      start: 'top 75%',
+      end: 'top 30%',
+      scrub: 1,
+      animation: gsap.timeline()
+        .to('#vid-shadow-1', { rotation: -3, x: -35, y: 15, opacity: 1, duration: 1.2, ease: 'back.out(1.2)' })
+        .to('#vid-shadow-2', { rotation: 3, x: 35, y: 15, opacity: 0.85, duration: 1.2, ease: 'back.out(1.2)' }, '<0.1')
+    });
+
+    // Scroll scrub — Hero fade out & shrink
+    gsap.to('#demo-hero', {
+      opacity: 0, y: -40, scale: 0.85, transformOrigin: 'center center',
+      ease: 'none',
+      scrollTrigger: { trigger: '#demo-hero', start: 'top top', end: 'bottom top', scrub: true }
+    });
 
     // Scroll scrub — CTA reveal
     gsap.to('#demo-cta', {
@@ -1107,13 +1149,14 @@ void main(){
       ppIcon.className = playing ? 'fa-solid fa-pause' : 'fa-solid fa-play';
     }
 
-    overlayBtn.addEventListener('click', () => {
+    overlayBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
       overlay.classList.add('hidden');
       controls.classList.add('pinned');
       video.play().then(() => {
         setPlay(true);
         setTimeout(() => controls.classList.remove('pinned'), 2800);
-      });
+      }).catch(err => console.error("Video play error:", err));
     });
 
     ppBtn.addEventListener('click', () => {
