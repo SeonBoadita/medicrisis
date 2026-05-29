@@ -1,3 +1,4 @@
-◇ injected env (6) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+◇ injected env (6) from .env // tip: ⌘ override existing { override: true }
 Database connected successfully.
 Real-Time Infrastructure listening on port 3000
+⚠️  CRYPTO MISMATCH — bypassing for local testing.
