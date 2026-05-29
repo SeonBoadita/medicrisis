@@ -386,11 +386,14 @@ function hideLoader() {
 
 async function init() {
   console.log('[mediCrisis] v10 — Light Mode + ScrollSmoother');
-  initRenderer(); initScene(); initSmoothScroll();
+  try { initRenderer(); } catch (e) { console.error('[mediCrisis] initRenderer failed:', e); }
+  try { initScene(); } catch (e) { console.error('[mediCrisis] initScene failed:', e); }
+  try { initSmoothScroll(); } catch (e) { console.error('[mediCrisis] initSmoothScroll failed:', e); }
   bgScene = new THREE.Scene(); bgCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   bgScene.add(createGrid());
-  try { await loadModel() } catch (e) { console.error(e) }
-  initScrollAnimations(); animate(); hideLoader();
+  try { await loadModel() } catch (e) { console.error('[mediCrisis] loadModel failed:', e) }
+  try { initScrollAnimations(); } catch (e) { console.error('[mediCrisis] initScrollAnimations failed:', e); }
+  animate(); hideLoader();
   addEventListener('resize', onResize);
 
   // Custom VR Cursor Physics

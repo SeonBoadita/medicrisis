@@ -139,7 +139,7 @@ app.post('/api/telemetry', async (req, res) => {
              payload.surgery_status, hospitalId, aiDebrief, phaseFailed]
         );
 
-        const newRecord = { ...payload, hospital_id: hospitalId, ai_debrief: aiDebrief };
+        const newRecord = { ...payload, hospital_id: hospitalId, ai_debrief: aiDebrief, created_at: new Date().toISOString() };
         io.to(hospitalId).emit('new_score', newRecord);
         io.to('public').emit('new_score', newRecord);
 
@@ -156,11 +156,11 @@ app.get('/api/leaderboard', async (req, res) => {
             isGlobal
                 ? `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
                           hospital_id, ai_debrief, phase_failed, created_at
-                   FROM leaderboard ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100`
+                   FROM leaderboard ORDER BY created_at DESC LIMIT 100`
                 : `SELECT id, player_name, integrity_score, duration_seconds, surgery_status,
                           hospital_id, ai_debrief, phase_failed, created_at
                    FROM leaderboard WHERE hospital_id = ?
-                   ORDER BY integrity_score DESC, duration_seconds ASC LIMIT 100`,
+                   ORDER BY created_at DESC LIMIT 100`,
             isGlobal ? [] : [hospitalId]
         );
         res.json(rows);

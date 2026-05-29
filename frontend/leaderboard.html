@@ -718,13 +718,20 @@
     function statusBadge(status) {
       const s = (status || '').toLowerCase();
       if (s === 'completed') return `<span class="status-badge status-completed"><i class="fa-solid fa-check mr-1"></i>Success</span>`;
-      if (s === 'stopped' || s === 'failed') return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Failed</span>`;
+      if (s === 'stopped' || s === 'failed') return `<span class="status-badge status-stopped"><i class="fa-solid fa-xmark mr-1"></i>Fail</span>`;
       return `<span class="status-badge status-left"><i class="fa-solid fa-minus mr-1"></i>Abandoned</span>`;
+    }
+    function isAbandoned(status) { const s = (status || '').toLowerCase(); return s !== 'completed' && s !== 'stopped' && s !== 'failed'; }
+    function statusPriority(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'completed') return 0;  // Success first
+      if (s === 'stopped' || s === 'failed') return 1;  // Fail second
+      return 2;  // Abandoned last
     }
     function rankClass(i) { return i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-default'; }
     function rankIcon(i) { return i === 0 ? '<i class="fa-solid fa-crown text-xs"></i>' : i + 1; }
     function playerKey(p) { return `${p.player_name}_${p.duration_seconds}_${p.integrity_score}`; }
-    function sortData(d) { return [...d].sort((a, b) => { const diff = (b.integrity_score || 0) - (a.integrity_score || 0); return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0); }); }
+    function sortData(d) { return [...d].sort((a, b) => { const sp = statusPriority(a.surgery_status) - statusPriority(b.surgery_status); if (sp !== 0) return sp; const diff = (b.integrity_score || 0) - (a.integrity_score || 0); return diff !== 0 ? diff : (a.duration_seconds || 0) - (b.duration_seconds || 0); }); }
     function scoreColor(s) { return s >= 80 ? '#000' : s >= 50 ? '#666' : '#ff3b5c'; }
     function scoreRingSVG(score) { const r = 17, c = 2 * Math.PI * r, off = c - (score / 100) * c, col = scoreColor(score); return `<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="${r}" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2.5"/><circle cx="20" cy="20" r="${r}" fill="none" stroke="${col}" stroke-width="2.5" stroke-dasharray="${c}" stroke-dashoffset="${off}" stroke-linecap="round"/></svg>`; }
 
@@ -734,7 +741,11 @@
 
     function buildRow(player, index, isNew) {
       const score = player.integrity_score || 0;
+      const abandoned = isAbandoned(player.surgery_status);
       const badges = getBadges(player);
+      const healthCol = abandoned
+        ? `<div class="score-ring hidden sm:flex items-center justify-center"><span class="text-sm font-bold text-black/25 stat-value">—</span></div>`
+        : `<div class="score-ring hidden sm:flex">${scoreRingSVG(score)}<span class="text-xs font-black stat-value" style="color:${scoreColor(score)}">${score}</span></div>`;
       return `
   <div class="player-row backdrop-blur-md bg-white/60 border border-black/5 rounded-xl px-4 py-2 flex items-center gap-3 ${isNew ? 'new-entry' : ''}" data-key="${playerKey(player)}" onclick="openModal(${index})">
     <div class="rank-badge ${rankClass(index)}">${rankIcon(index)}</div>
@@ -742,7 +753,7 @@
       <p class="font-bold text-sm text-black truncate">${player.player_name}</p>
       ${badges ? `<div class="badge-row mt-1">${badges}</div>` : ''}
     </div>
-    <div class="score-ring hidden sm:flex">${scoreRingSVG(score)}<span class="text-xs font-black stat-value" style="color:${scoreColor(score)}">${score}</span></div>
+    ${healthCol}
     <div class="w-24 text-center hidden sm:block"><span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span></div>
     <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`
@@ -778,20 +789,42 @@
       timeSeriesChart = new Chart(ctx, {
         type: 'line',
         data: { labels: [], datasets: [{ label: 'Health Score', data: [], borderColor: '#000', backgroundColor: 'rgba(0,0,0,0.06)', tension: .4, fill: true, pointRadius: 4, pointBackgroundColor: '#000' }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 9 } } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `Health: ${ctx.raw}%` } } } }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10 } } }, x: { grid: { display: false }, ticks: { font: { size: 8 }, maxRotation: 45, minRotation: 25, autoSkip: true, maxTicksLimit: 15 } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `Health: ${ctx.raw}%` } } } }
       });
+    }
+    function parseDate(ts) {
+      if (!ts) return null;
+      // MySQL returns "2026-05-29 20:45:00", JS needs "2026-05-29T20:45:00"
+      const d = new Date(typeof ts === 'string' ? ts.replace(' ', 'T') : ts);
+      return isNaN(d) ? null : d;
+    }
+    function formatTimestamp(ts) {
+      const d = parseDate(ts);
+      if (!d) return '—';
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm} ${hh}:${min}`;
     }
     function updateChart(data) {
       if (!timeSeriesChart) return;
-      const recent = data.slice(0, 30).reverse();
-      timeSeriesChart.data.labels = recent.map(d => d.player_name.split(' ')[0] || '');
-      timeSeriesChart.data.datasets[0].data = recent.map(d => {
-        let score = parseInt(d.integrity_score) || 0;
-        const status = (d.surgery_status || '').toLowerCase();
-        if (status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
-          score = 0;
-        }
-        return score;
+      // Sort chronologically by created_at (oldest → newest)
+      const chrono = [...data].sort((a, b) => {
+        const da = parseDate(a.created_at), db = parseDate(b.created_at);
+        if (!da && !db) return 0;
+        if (!da) return -1;
+        if (!db) return 1;
+        return da - db;
+      });
+      const recent = chrono.slice(-30);
+      timeSeriesChart.data.labels = recent.map(d => [d.player_name ? d.player_name.split(' ')[0] : 'Unknown', formatTimestamp(d.created_at)]);
+      timeSeriesChart.data.datasets[0].data = recent.map(d => isAbandoned(d.surgery_status) ? 0 : (parseInt(d.integrity_score) || 0));
+      timeSeriesChart.data.datasets[0].pointBackgroundColor = recent.map(d => {
+        const s = (d.surgery_status || '').toLowerCase();
+        if (s === 'completed') return '#10b981';
+        if (s === 'stopped' || s === 'failed') return '#ef4444';
+        return '#9ca3af';
       });
       timeSeriesChart.update();
     }
@@ -801,14 +834,13 @@
         if (!res.ok) throw new Error();
         const rows = await res.json();
         document.getElementById('trendLabel').textContent = `${name} — Last ${rows.length} Sessions`;
-        timeSeriesChart.data.labels = rows.map((_, i) => `#${i + 1}`);
-        timeSeriesChart.data.datasets[0].data = rows.map(r => {
-          let score = parseInt(r.integrity_score) || 0;
-          const status = (r.surgery_status || '').toLowerCase();
-          if (status === 'failed' || status === 'stopped' || status === 'abandoned' || status !== 'completed') {
-            score = 0;
-          }
-          return score;
+        timeSeriesChart.data.labels = rows.map(r => formatTimestamp(r.created_at));
+        timeSeriesChart.data.datasets[0].data = rows.map(r => isAbandoned(r.surgery_status) ? 0 : (parseInt(r.integrity_score) || 0));
+        timeSeriesChart.data.datasets[0].pointBackgroundColor = rows.map(r => {
+          const s = (r.surgery_status || '').toLowerCase();
+          if (s === 'completed') return '#10b981';
+          if (s === 'stopped' || s === 'failed') return '#ef4444';
+          return '#9ca3af';
         });
         timeSeriesChart.update();
         switchTab('charts');
