@@ -10,3 +10,6 @@ frontend/assets/images/*
 # Except the profile directory itself and its contents
 !frontend/assets/images/profile/
 !frontend/assets/images/profile/.gitkeep
+
+# Ignore Prabhu's standalone page
+frontend/prabhu.html
