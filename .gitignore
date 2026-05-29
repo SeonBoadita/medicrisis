@@ -4,8 +4,9 @@
 # Dependencies
 node_modules/
 
-# Ignore user-uploaded profile images
-frontend/assets/logo/images/profile/*
+# Ignore all images in the frontend/assets/images directory
+frontend/assets/images/*
 
-# Optional: Keep the directory structure in Git but ignore the files inside
-!frontend/assets/logo/images/profile/.gitkeep
+# Except the profile directory itself and its contents
+!frontend/assets/images/profile/
+!frontend/assets/images/profile/.gitkeep

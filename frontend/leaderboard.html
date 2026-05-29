@@ -610,7 +610,7 @@
         </div>
 
         <!-- Leaderboard (only this scrolls) -->
-        <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
+        <div id="leaderboard" class="scroll-container min-h-0 flex flex-col gap-2 flex-1 p-3">
           <div id="leaderboard-content" class="flex flex-col gap-2 min-h-full">
             <div id="emptyState" class="rounded-2xl p-12 text-center">
               <i class="fa-solid fa-satellite-dish text-4xl text-black/30 mb-4"></i>
@@ -813,7 +813,7 @@
       ${badges ? `<div class="badge-row mt-1">${badges}</div>` : ''}
     </div>
     ${healthCol}
-    <div class="w-24 text-center hidden sm:block"><span class="stat-value font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span></div>
+    <div class="w-24 text-center hidden sm:block"><span class="stat-value font-doto font-bold text-sm text-black/70">${formatTime(player.duration_seconds)}</span></div>
     <div class="w-32 text-center flex-shrink-0">${statusBadge(player.surgery_status)}</div>
   </div>`
     }

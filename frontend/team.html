@@ -29,10 +29,10 @@
   <script>tailwind.config = { theme: { extend: { fontFamily: { doto: ['Doto'], inter: ['Inter'] } } } }</script>
 
   <!-- Preload Profile Images -->
-  <link rel="preload" href="assets/logo/images/profile/Seon_Boadita.png" as="image">
-  <link rel="preload" href="assets/logo/images/profile/.jpeg" as="image">
-  <link rel="preload" href="assets/logo/images/profile/Gerontius_Rodrigues.png" as="image">
-  <link rel="preload" href="assets/logo/images/profile/Varun_Raikar.png" as="image">
+  <link rel="preload" href="assets/images/profile/Seon_Boadita.png" as="image">
+  <link rel="preload" href="assets/images/profile/.jpeg" as="image">
+  <link rel="preload" href="assets/images/profile/Gerontius_Rodrigues.png" as="image">
+  <link rel="preload" href="assets/images/profile/Varun_Raikar.png" as="image">
 
   <style>
     :root {
@@ -304,7 +304,7 @@
       will-change: transform;
     }
 
-    .team-card:hover {
+    .team-card:hover { border-color: rgba(255, 255, 255, 0.8); box-shadow: 0 0 20px rgba(255,255,255,0.4);
       background: rgba(255, 255, 255, 0.6);
       box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
       z-index: 2;
@@ -338,7 +338,7 @@
     .card-overlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 60%);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, rgba(0,0,0,0.4) 20%, transparent 100%);
       opacity: 0;
       transition: opacity 0.5s ease;
       display: flex;
@@ -371,7 +371,7 @@
     }
 
     .card-info .name {
-      font-size: 1.15rem;
+      font-size: 1.25rem; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: -0.02em;
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.2;
@@ -391,7 +391,7 @@
       font-family: 'Doto', monospace;
       font-size: 1.5rem;
       font-weight: 900;
-      color: rgba(0, 0, 0, 0.1);
+      color: rgba(0, 0, 0, 0.5);
       line-height: 1;
     }
 
@@ -441,7 +441,7 @@
       justify-content: center;
       background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
       font-size: 3rem;
-      color: rgba(0, 0, 0, 0.1);
+      color: rgba(0, 0, 0, 0.5);
     }
   </style>
   <script src="navbar.js"></script>
@@ -498,27 +498,44 @@
       <!-- Member 1 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Seon_Boadita.png" alt="Seon Boadita" fetchpriority="high"
+          <img src="assets/images/profile/Seon_Boadita.png" alt="Seon Boadita" fetchpriority="high"
             onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
-              <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Driving the intersection of VR
-                algorithms and clinical education to craft the future of med-tech.</p>
-              <div class="flex gap-2">
+              <div class="flex flex-nowrap gap-1 mb-4 group/skills justify-center">
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Unity</span>
+                  <i class="fa-brands fa-unity col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Blender</span>
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 opacity-0 transition-all duration-300 group-hover/tag:w-[48px] group-hover/tag:h-[48px] group-hover/tag:opacity-100 flex items-center justify-center"><img src="assets/logo/blender_logo.svg" alt="Blender" class="w-full h-full object-contain"></div>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Web</span>
+                  <i class="fa-brands fa-html5 col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-[#f97316] text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">AI</span>
+                  <i class="fa-solid fa-brain col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+              </div>
+              <div class="flex gap-2 group/social">
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-linkedin-in text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-linkedin-in text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-[#0a66c2]"></i>
+                </a>
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-github text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-github text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-white"></i>
+                </a>
               </div>
             </div>
           </div>
         </div>
         <div class="card-info">
           <div>
-            <p class="name">Mr. Seon Boadita</p>
-            <p class="role">Team Lead</p>
+            <p class="name">Seon Boadita</p>
           </div>
           <span class="num">01</span>
         </div>
@@ -527,19 +544,33 @@
       <!-- Member 2 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Prabhu_Hosalli.png" alt="Prabhu Hosalli" fetchpriority="high"
+          <img src="assets/images/profile/Prabhu_Hosalli.png" alt="Prabhu Hosalli" fetchpriority="high"
             onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
-              <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Building robust multiplayer physics
-                engines and real-time telemetry systems for zero-latency operations.</p>
-              <div class="flex gap-2">
+              <div class="flex flex-nowrap gap-1 mb-4 group/skills justify-center">
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Unity</span>
+                  <i class="fa-brands fa-unity col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Web</span>
+                  <i class="fa-brands fa-html5 col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-[#f97316] text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">AI</span>
+                  <i class="fa-solid fa-brain col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+              </div>
+              <div class="flex gap-2 group/social">
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-linkedin-in text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-linkedin-in text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-[#0a66c2]"></i>
+                </a>
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-github text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-github text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-white"></i>
+                </a>
               </div>
             </div>
           </div>
@@ -547,7 +578,6 @@
         <div class="card-info">
           <div>
             <p class="name">Prabhu Hosalli</p>
-            <p class="role">Systems Engineer</p>
           </div>
           <span class="num">02</span>
         </div>
@@ -556,19 +586,33 @@
       <!-- Member 3 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Varun_Raikar.png" alt="Varun Raikar" fetchpriority="high"
+          <img src="assets/images/profile/Varun_Raikar.png" alt="Varun Raikar" fetchpriority="high"
             onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
-              <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Designing intuitive, glassmorphic
-                interfaces that melt away, letting surgeons focus entirely on the procedure.</p>
-              <div class="flex gap-2">
+              <div class="flex flex-nowrap gap-1 mb-4 group/skills justify-center">
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Blender</span>
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 opacity-0 transition-all duration-300 group-hover/tag:w-[48px] group-hover/tag:h-[48px] group-hover/tag:opacity-100 flex items-center justify-center"><img src="assets/logo/blender_logo.svg" alt="Blender" class="w-full h-full object-contain"></div>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Research</span>
+                  <i class="fa-solid fa-microscope col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Paperworks</span>
+                  <i class="fa-solid fa-file-signature col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+              </div>
+              <div class="flex gap-2 group/social">
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-linkedin-in text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-linkedin-in text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-[#0a66c2]"></i>
+                </a>
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-github text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-github text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-white"></i>
+                </a>
               </div>
             </div>
           </div>
@@ -576,7 +620,6 @@
         <div class="card-info">
           <div>
             <p class="name">Varun Raikar</p>
-            <p class="role">UI/UX Director</p>
           </div>
           <span class="num">03</span>
         </div>
@@ -585,19 +628,33 @@
       <!-- Member 4 -->
       <div class="team-card hover-trigger">
         <div class="card-img-wrap">
-          <img src="assets/logo/images/profile/Gerontius_Rodrigues.png" alt="Gerontius Rodrigues" fetchpriority="high"
+          <img src="assets/images/profile/Gerontius_Rodrigues.png" alt="Gerontius Rodrigues" fetchpriority="high"
             onload="this.classList.add('loaded')">
           <div class="card-overlay">
             <div class="bio">
-              <p class="text-white/90 text-sm leading-relaxed mb-4 font-medium">Developing AI evaluation models to
-                instantly score integrity and precision during critical trauma simulations.</p>
-              <div class="flex gap-2">
+              <div class="flex flex-nowrap gap-1 mb-4 group/skills justify-center">
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Blender</span>
+                  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-0 h-0 opacity-0 transition-all duration-300 group-hover/tag:w-[48px] group-hover/tag:h-[48px] group-hover/tag:opacity-100 flex items-center justify-center"><img src="assets/logo/blender_logo.svg" alt="Blender" class="w-full h-full object-contain"></div>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Research</span>
+                  <i class="fa-solid fa-microscope col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+                <div class="group/tag relative w-[64px] h-[22px] bg-white/10 backdrop-blur border border-white/20 rounded text-[8.5px] text-white uppercase tracking-wider font-doto transition-all duration-300 grid place-items-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none cursor-none group-hover/skills:blur-[1px] hover:!blur-none z-10 hover:z-20">
+                  <span class="col-start-1 row-start-1 transition-all duration-300 group-hover/tag:opacity-0 group-hover/tag:scale-50">Paperworks</span>
+                  <i class="fa-solid fa-file-signature col-start-1 row-start-1 opacity-0 transition-all duration-300 group-hover/tag:opacity-100 group-hover/tag:scale-[2.5] text-white text-[16px]"></i>
+                </div>
+              </div>
+              <div class="flex gap-2 group/social">
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-linkedin-in text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-linkedin-in text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-[#0a66c2]"></i>
+                </a>
                 <a href="#"
-                  class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white hover:text-black transition-colors text-white"><i
-                    class="fa-brands fa-github text-[11px]"></i></a>
+                  class="group/icon w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-transparent hover:border-transparent hover:backdrop-blur-none transition-all duration-300 text-white cursor-none z-10 hover:z-20">
+                  <i class="fa-brands fa-github text-[11px] transition-all duration-300 group-hover/icon:scale-[1.8] group-hover/icon:text-white"></i>
+                </a>
               </div>
             </div>
           </div>
@@ -605,7 +662,6 @@
         <div class="card-info">
           <div>
             <p class="name">Gerontius Rodrigues</p>
-            <p class="role">AI Researcher</p>
           </div>
           <span class="num">04</span>
         </div>
