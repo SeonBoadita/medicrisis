@@ -12,7 +12,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // --- ROUTE 1: GET (Fetch Leaderboard) ---
 if ($method === 'GET') {
-    $query = "SELECT player_name, integrity_score, duration_seconds, surgery_status FROM leaderboard ORDER BY integrity_score DESC, duration_seconds ASC";
+    $query = "SELECT player_name, integrity_score, duration_seconds, surgery_status, created_at FROM leaderboard ORDER BY created_at DESC LIMIT 100";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     
