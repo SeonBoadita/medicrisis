@@ -17,6 +17,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <script
     type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
@@ -173,6 +174,34 @@
     .bg-black *::selection {
       background: #fff;
       color: #000;
+    }
+
+    /* Smooth Leaderboard Scrollbar */
+    .scroll-container {
+      scroll-behavior: smooth;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .scroll-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .scroll-container::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 10px;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+
+    .scroll-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.3);
     }
 
     /* Spatial Heatmap Container */
@@ -582,9 +611,11 @@
 
         <!-- Leaderboard (only this scrolls) -->
         <div id="leaderboard" class="scroll-container flex flex-col gap-2 flex-1 p-3">
-          <div id="emptyState" class="rounded-2xl p-12 text-center">
-            <i class="fa-solid fa-satellite-dish text-4xl text-black/30 mb-4"></i>
-            <p class="text-black/60 text-sm font-medium">Awaiting surgeon data feed…</p>
+          <div id="leaderboard-content" class="flex flex-col gap-2 min-h-full">
+            <div id="emptyState" class="rounded-2xl p-12 text-center">
+              <i class="fa-solid fa-satellite-dish text-4xl text-black/30 mb-4"></i>
+              <p class="text-black/60 text-sm font-medium">Awaiting surgeon data feed…</p>
+            </div>
           </div>
         </div>
       </div>
@@ -704,9 +735,28 @@
   </footer>
 
   <script>
+    // ── Smooth Scroll Setup ────────────────────────────
+    let lenis;
+    document.addEventListener('DOMContentLoaded', () => {
+      const wrapper = document.getElementById('leaderboard');
+      const content = document.getElementById('leaderboard-content');
+      lenis = new Lenis({
+        wrapper: wrapper,
+        content: content,
+        lerp: 0.05,
+        smoothWheel: true
+      });
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    });
+
     const API_URL = '../api.php';
     let knownPlayerKeys = new Set();
     let cachedData = [];
+    let currentSortedData = [];
     let activeModal = null;
     let audioEl = null;
 
@@ -857,7 +907,8 @@
       timeSeriesChart.data.rawRecords = recent;
       timeSeriesChart.data.labels = recent.map(d => [d.player_name ? d.player_name.split(' ')[0] : 'Unknown', formatTimestamp(d.created_at)]);
       timeSeriesChart.data.datasets[0].data = recent.map(d => parseInt(d.integrity_score) || 0);
-      timeSeriesChart.data.datasets[0].backgroundColor = recent.map(() => '#10b981');
+      timeSeriesChart.data.datasets[0].backgroundColor = recent.map(() => 'rgba(16, 185, 129, 0.2)');
+      timeSeriesChart.data.datasets[0].hoverBackgroundColor = recent.map(() => '#10b981');
       timeSeriesChart.data.datasets[0].borderColor = recent.map(() => 'transparent');
       timeSeriesChart.data.datasets[0].borderWidth = recent.map(() => 0);
       timeSeriesChart.update();
@@ -872,7 +923,8 @@
         timeSeriesChart.data.rawRecords = completedRows;
         timeSeriesChart.data.labels = completedRows.map(r => formatTimestamp(r.created_at));
         timeSeriesChart.data.datasets[0].data = completedRows.map(r => parseInt(r.integrity_score) || 0);
-        timeSeriesChart.data.datasets[0].backgroundColor = completedRows.map(() => '#10b981');
+        timeSeriesChart.data.datasets[0].backgroundColor = completedRows.map(() => 'rgba(16, 185, 129, 0.2)');
+        timeSeriesChart.data.datasets[0].hoverBackgroundColor = completedRows.map(() => '#10b981');
         timeSeriesChart.data.datasets[0].borderColor = completedRows.map(() => 'transparent');
         timeSeriesChart.data.datasets[0].borderWidth = completedRows.map(() => 0);
         timeSeriesChart.update();
@@ -883,16 +935,19 @@
 
     // ── Render Leaderboard ─────────────────────────────
     function renderLeaderboard(data, isInitial) {
-      const board = document.getElementById('leaderboard');
+      const boardContent = document.getElementById('leaderboard-content');
       const sorted = sortData(data);
+      currentSortedData = sorted;
       const newKeys = new Set(sorted.map(playerKey));
       const freshKeys = new Set();
       newKeys.forEach(k => { if (!knownPlayerKeys.has(k)) freshKeys.add(k); });
       knownPlayerKeys = newKeys;
-      board.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
-      const rows = board.querySelectorAll('.player-row');
-      if (isInitial) { gsap.from(rows, { y: 40, opacity: 0, duration: .5, stagger: .07, ease: 'power3.out', clearProps: 'all' }); }
-      else if (freshKeys.size > 0) { rows.forEach(row => { if (freshKeys.has(row.dataset.key)) gsap.from(row, { x: -60, opacity: 0, duration: .6, ease: 'back.out(1.4)', clearProps: 'all' }); }); }
+      if (boardContent) {
+        boardContent.innerHTML = sorted.map((p, i) => buildRow(p, i, !isInitial && freshKeys.has(playerKey(p)))).join('');
+        const rows = boardContent.querySelectorAll('.player-row');
+        if (isInitial) { gsap.from(rows, { y: 40, opacity: 0, duration: .5, stagger: .07, ease: 'power3.out', clearProps: 'all' }); }
+        else if (freshKeys.size > 0) { rows.forEach(row => { if (freshKeys.has(row.dataset.key)) gsap.from(row, { x: -60, opacity: 0, duration: .6, ease: 'back.out(1.4)', clearProps: 'all' }); }); }
+      }
       attachHover();
       updateStats(sorted);
       updateChart(sorted);
@@ -901,7 +956,7 @@
 
     // ── Deep-Dive Modal ────────────────────────────────
     function openModal(item) {
-      const player = typeof item === 'number' ? cachedData[item] : (typeof item === 'string' ? JSON.parse(item) : item);
+      const player = typeof item === 'number' ? currentSortedData[item] : (typeof item === 'string' ? JSON.parse(item) : item);
       activeModal = player;
       const score = player.integrity_score || 0;
       document.getElementById('modalScore').textContent = score;
