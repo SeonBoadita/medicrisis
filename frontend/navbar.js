@@ -50,21 +50,21 @@ class MedicrisisNavbar extends HTMLElement {
         </div>
         
         <div class="hidden md:flex items-center gap-1 p-1.5 bg-black/5 rounded-full border border-black/5 shadow-inner">
-          <a href="index.html" class="nav-link ${isHome ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
-            <span class="relative z-10">Home</span>
-            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+          <a href="index.html" class="nav-link relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto ${isHome ? 'pointer-events-none' : ''}">
+            <span class="relative z-10 ${isHome ? '!text-black !font-black' : ''}">Home</span>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full ${isHome ? '!translate-y-0 !bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : ''}"></div>
           </a>
-          <a href="team.html" class="nav-link ${isTeam ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
-            <span class="relative z-10">The Team</span>
-            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+          <a href="team.html" class="nav-link relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto ${isTeam ? 'pointer-events-none' : ''}">
+            <span class="relative z-10 ${isTeam ? '!text-black !font-black' : ''}">The Team</span>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full ${isTeam ? '!translate-y-0 !bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : ''}"></div>
           </a>
-          <a href="leaderboard.html" class="nav-link ${isLeaderboard ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
-            <span class="relative z-10">Leaderboard</span>
-            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+          <a href="leaderboard.html" class="nav-link relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto ${isLeaderboard ? 'pointer-events-none' : ''}">
+            <span class="relative z-10 ${isLeaderboard ? '!text-black !font-black' : ''}">Leaderboard</span>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full ${isLeaderboard ? '!translate-y-0 !bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : ''}"></div>
           </a>
-          <a href="admin.html" class="nav-link ${isAdmin ? 'active' : ''} relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto">
-            <span class="relative z-10"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
-            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full"></div>
+          <a href="admin.html" class="nav-link relative px-4 sm:px-5 py-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-black/60 hover:text-white transition-colors group overflow-hidden rounded-full hover-trigger font-doto ${isAdmin ? 'pointer-events-none' : ''}">
+            <span class="relative z-10 ${isAdmin ? '!text-black !font-black' : ''}"><i class="fa-solid fa-lock mr-1 text-[0.5rem]"></i>Admin</span>
+            <div class="absolute inset-0 bg-black translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] rounded-full ${isAdmin ? '!translate-y-0 !bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)]' : ''}"></div>
           </a>
         </div>
         

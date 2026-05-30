@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLSL Mask Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #gl-canvas { display: block; width: 100vw; height: 100vh; }
+    #hint {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.4);
+      font-family: monospace;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      pointer-events: none;
+    }
+  </style>
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js"}}</script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+</head>
+<body>
+  <canvas id="gl-canvas"></canvas>
+  <div id="hint">HOVER TO TRANSITION</div>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    const canvas = document.getElementById('gl-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+    const loader = new THREE.TextureLoader();
+
+    const uniforms = {
+      tDiffuse1:   { value: null },
+      tDiffuse2:   { value: null },
+      uTime:       { value: 0.0 },
+      uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      uImg1Size:   { value: new THREE.Vector2(1, 1) },
+      uImg2Size:   { value: new THREE.Vector2(1, 1) },
+      uMouse:      { value: new THREE.Vector2(-9999, -9999) }, // screen-space px
+      uRadius:     { value: 50.0 },
+    };
+
+    loader.load('assets/images/profile/Prabhu_Hosalli.png', tex => {
+      tex.minFilter = THREE.LinearFilter;
+      uniforms.tDiffuse1.value = tex;
+      uniforms.uImg1Size.value.set(tex.image.width, tex.image.height);
+    });
+    loader.load('assets/images/profile/Prabhu_Hosalli2.png', tex => {
+      tex.minFilter = THREE.LinearFilter;
+      uniforms.tDiffuse2.value = tex;
+      uniforms.uImg2Size.value.set(tex.image.width, tex.image.height);
+    });
+
+    const vertexShader = `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+      }
+    `;
+
+    const fragmentShader = `
+      precision highp float;
+      varying vec2 vUv;
+
+      uniform sampler2D tDiffuse1;
+      uniform sampler2D tDiffuse2;
+      uniform float uTime;
+      uniform vec2  uResolution;
+      uniform vec2  uImg1Size;
+      uniform vec2  uImg2Size;
+      uniform vec2  uMouse;    // cursor in screen pixels (Y flipped)
+      uniform float uRadius;   // reveal radius in pixels
+
+      /* object-fit: contain — image fully visible with black bars */
+      vec2 containUv(vec2 uv, vec2 screen, vec2 img) {
+        float sAR = screen.x / screen.y;
+        float iAR = img.x    / img.y;
+        vec2 scale = sAR > iAR
+          ? vec2(iAR / sAR, 1.0)
+          : vec2(1.0, sAR / iAR);
+        return (uv - 0.5) / scale + 0.5;
+      }
+
+      /* Value noise for subtle edge wobble */
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        vec2 u = f*f*(3.0-2.0*f);
+        return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),
+                   mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);
+      }
+      float fbm(vec2 p){
+        float v=0.,a=0.5;
+        for(int i=0;i<3;i++){ v+=a*noise(p); p*=2.1; a*=0.5; }
+        return v;
+      }
+
+      void main() {
+        vec2 res  = uResolution;
+
+        /* Convert this fragment to screen-space pixels */
+        vec2 fragPx = vUv * res;
+        /* Flip Y so mouse origin is top-left like the browser */
+        vec2 mousePx = vec2(uMouse.x, res.y - uMouse.y);
+
+        /* Distance from cursor in pixels */
+        float dist = length(fragPx - mousePx);
+
+        /* --- Circular mask --- */
+        /* Feather: inner 80% hard, outer 20% smooth falloff */
+        float inner = uRadius * 0.8;
+        float outer = uRadius;
+        /* mask = 1.0 at center, 0.0 outside radius */
+        float circleMask = 1.0 - smoothstep(inner, outer, dist);
+
+        /* Very subtle noise warp on the edge ring only */
+        float n = fbm(vUv * 12.0 + uTime * 0.15);
+        /* Add noise only near the edge (not inside the circle) */
+        float edgeRing = smoothstep(inner * 0.6, inner, dist) * (1.0 - smoothstep(outer, outer * 1.2, dist));
+        circleMask += n * 0.08 * edgeRing;
+        circleMask = clamp(circleMask, 0.0, 1.0);
+
+        /* Contain UVs for both textures */
+        vec2 uv1 = containUv(vUv, res, uImg1Size);
+        vec2 uv2 = containUv(vUv, res, uImg2Size);
+
+        bool out1 = uv1.x<0.||uv1.x>1.||uv1.y<0.||uv1.y>1.;
+        bool out2 = uv2.x<0.||uv2.x>1.||uv2.y<0.||uv2.y>1.;
+
+        vec4 col1 = out1 ? vec4(0.0) : texture2D(tDiffuse1, uv1);
+        vec4 col2 = out2 ? vec4(0.0) : texture2D(tDiffuse2, uv2);
+
+        /* Merge: image2 appears inside the circle, image1 outside */
+        gl_FragColor = mix(col1, col2, circleMask);
+      }
+    `;
+
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(2, 2),
+      new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader })
+    );
+    scene.add(mesh);
+
+    const clock = new THREE.Clock();
+    (function animate() {
+      requestAnimationFrame(animate);
+      uniforms.uTime.value = clock.getElapsedTime();
+      renderer.render(scene, camera);
+    })();
+
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+    });
+
+    /* Track mouse position → feed into shader as screen pixels */
+    window.addEventListener('mousemove', e => {
+      uniforms.uMouse.value.set(e.clientX, e.clientY);
+    });
+    /* When cursor leaves viewport, hide reveal */
+    document.addEventListener('mouseleave', () => {
+      uniforms.uMouse.value.set(-9999, -9999);
+    });
+
+  </script>
+</body>
+</html>
