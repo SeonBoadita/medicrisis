@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>mediCrisis — Admin Panel</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -171,7 +171,7 @@
 
     .input-field {
       width: 100%;
-      padding: 12px 16px;
+      padding: 12px 48px 12px 16px;
       border: 1px solid rgba(0, 0, 0, .12);
       border-radius: 12px;
       font-size: .875rem;
@@ -183,6 +183,57 @@
 
     .input-field:focus {
       border-color: #000
+    }
+
+    .pwd-wrapper {
+      position: relative;
+      margin-bottom: 16px;
+    }
+
+    .eye-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .eye-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .eye-svg {
+      width: 22px;
+      height: 22px;
+      overflow: visible;
+    }
+
+    .eye-svg .eye-top, .eye-svg .eye-bottom {
+      transition: d 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .eye-svg .eye-pupil {
+      transition: r 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s;
+    }
+
+    .eye-svg .eye-lash {
+      stroke: rgba(0, 0, 0, 0.5);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform-origin: center;
+    }
+
+    .eye-btn.closed .eye-lash {
+      opacity: 1;
     }
 
     /* Table */
@@ -315,10 +366,22 @@
       <div class="text-center mb-8">
         <div class="text-4xl mb-3"><i class="fa-solid fa-lock text-black/40"></i></div>
         <h1 class="font-doto text-2xl font-black text-black mb-1">Admin Access</h1>
-        <p class="text-xs text-black/40 font-medium font-doto tracking-widest">mediCrisis Secure Control Panel</p>
+        <p class="text-xs text-black font-medium font-doto tracking-widest">mediCrisis Secure Control Panel</p>
       </div>
-      <input type="password" id="pwdInput" placeholder="Enter admin password" class="input-field mb-4"
-        onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="pwd-wrapper">
+        <input type="password" id="pwdInput" placeholder="Enter admin password" class="input-field"
+          onkeydown="if(event.key==='Enter')doLogin()">
+        <button type="button" class="eye-btn" id="eyeBtn" onclick="togglePwd()" tabindex="-1" aria-label="Toggle password visibility">
+          <svg class="eye-svg" viewBox="0 0 24 24" fill="none" id="eyeSvg">
+            <path class="eye-top" d="M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12" stroke="rgba(0,0,0,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <path class="eye-bottom" d="M2 12C2 12 5.5 19 12 19C18.5 19 22 12 22 12" stroke="rgba(0,0,0,0.5)" stroke-width="1.5" stroke-linecap="round"/>
+            <circle class="eye-pupil" cx="12" cy="12" r="3" fill="rgba(0,0,0,0.5)"/>
+            <line class="eye-lash" x1="12" y1="5" x2="12" y2="2"/>
+            <line class="eye-lash" x1="7" y1="6.5" x2="5" y2="4"/>
+            <line class="eye-lash" x1="17" y1="6.5" x2="19" y2="4"/>
+          </svg>
+        </button>
+      </div>
       <button onclick="doLogin()"
         class="w-full py-3 bg-black text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-black/80 transition-colors flex items-center justify-center gap-2 font-doto"
         id="loginBtn">
@@ -337,7 +400,7 @@
         <span class="text-xs font-bold text-black tracking-widest font-doto">SECURE</span>
       </div>
       <button onclick="doLogout()"
-        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/50 hover:text-black transition-colors font-doto"><i
+        class="px-4 py-2 text-xs font-bold uppercase tracking-widest text-black/70 hover:text-black transition-colors font-doto"><i
           class="fa-solid fa-right-from-bracket mr-1"></i>Logout</button>
     </medicrisis-navbar>
 
@@ -345,16 +408,16 @@
       <!-- Stats Row -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" id="adminStats">
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
-          <p class="font-doto text-2xl font-black" id="statTotal">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Total Sessions</p>
+          <p class="font-poppins text-2xl font-black" id="statTotal">—</p>
+          <p class="text-[0.6rem] text-black uppercase tracking-widest mt-1 font-doto">Total Sessions</p>
         </div>
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
-          <p class="font-doto text-2xl font-black" id="statAvg">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Avg Health</p>
+          <p class="font-poppins text-2xl font-black" id="statAvg">—</p>
+          <p class="text-[0.6rem] text-black uppercase tracking-widest mt-1 font-doto">Avg Health</p>
         </div>
         <div class="glass rounded-2xl p-4 text-center border border-black/8 shadow-sm">
-          <p class="font-doto text-2xl font-black" id="statRate">—</p>
-          <p class="text-[0.6rem] text-black/40 uppercase tracking-widest mt-1 font-doto">Success Rate</p>
+          <p class="font-poppins text-2xl font-black" id="statRate">—</p>
+          <p class="text-[0.6rem] text-black uppercase tracking-widest mt-1 font-doto">Success Rate</p>
         </div>
       </div>
 
@@ -417,6 +480,33 @@
         el.addEventListener('mouseenter', () => vrCursor.classList.add('hover'));
         el.addEventListener('mouseleave', () => vrCursor.classList.remove('hover'));
       });
+    }
+
+    // Animated eye toggle
+    function togglePwd() {
+      const pwd = document.getElementById('pwdInput');
+      const btn = document.getElementById('eyeBtn');
+      const topPath = document.querySelector('.eye-top');
+      const bottomPath = document.querySelector('.eye-bottom');
+      const pupil = document.querySelector('.eye-pupil');
+
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        btn.classList.add('closed');
+        // Close the eye: flatten the curves
+        topPath.setAttribute('d', 'M2 12C2 12 5.5 12 12 12C18.5 12 22 12 22 12');
+        bottomPath.setAttribute('d', 'M2 12C2 12 5.5 12 12 12C18.5 12 22 12 22 12');
+        pupil.setAttribute('r', '0');
+        pupil.style.opacity = '0';
+      } else {
+        pwd.type = 'password';
+        btn.classList.remove('closed');
+        // Open the eye: restore curves
+        topPath.setAttribute('d', 'M2 12C2 12 5.5 5 12 5C18.5 5 22 12 22 12');
+        bottomPath.setAttribute('d', 'M2 12C2 12 5.5 19 12 19C18.5 19 22 12 22 12');
+        pupil.setAttribute('r', '3');
+        pupil.style.opacity = '1';
+      }
     }
 
     function formatTime(sec) { const m = Math.floor(sec / 60), s = sec % 60; return `${m}m ${String(s).padStart(2, '0')}s`; }
@@ -516,7 +606,7 @@
         return `<tr>
           <td class="font-doto text-black font-bold">${rank}</td>
           <td class="font-bold text-black">${r.player_name}</td>
-          <td class="font-doto font-black">${r.integrity_score}%</td>
+          <td class="font-poppins font-black" style="letter-spacing:-0.02em">${r.integrity_score}%</td>
           <td class="font-doto text-black/80 font-medium">${formatTime(r.duration_seconds)}</td>
           <td>${statusBadge}</td>
           <td class="font-doto text-black/80 text-xs font-medium">${ts}</td>

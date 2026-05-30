@@ -7,7 +7,7 @@
   <title>mediCrisis — Surgeon Profile</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
-    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -209,12 +209,12 @@
         </div>
         <div class="ml-auto grid grid-cols-2 gap-4">
           <div class="text-center">
-            <p class="font-doto text-3xl font-black text-black" id="profileAvg">—</p>
-            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest font-doto">Avg Score</p>
+            <p class="font-poppins text-3xl font-black text-black" id="profileAvg">—</p>
+            <p class="text-[0.6rem] text-black uppercase tracking-widest font-doto">Avg Score</p>
           </div>
           <div class="text-center">
-            <p class="font-doto text-3xl font-black text-black" id="profileBest">—</p>
-            <p class="text-[0.6rem] text-black/40 uppercase tracking-widest font-doto">Best Score</p>
+            <p class="font-poppins text-3xl font-black text-black" id="profileBest">—</p>
+            <p class="text-[0.6rem] text-black uppercase tracking-widest font-doto">Best Score</p>
           </div>
         </div>
       </div>
@@ -222,14 +222,14 @@
 
     <!-- Trend Chart -->
     <div class="glass rounded-3xl p-6 mb-6 border border-black/8 shadow-lg">
-      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4 font-doto"><i
+      <h2 class="text-xs font-bold text-black/70 uppercase tracking-widest mb-4 font-doto"><i
           class="fa-solid fa-chart-line mr-2"></i>Health Score — Career Trend</h2>
       <div style="height:200px;position:relative"><canvas id="trendChart"></canvas></div>
     </div>
 
     <!-- Session History -->
     <div class="glass rounded-3xl p-6 mb-6 border border-black/8 shadow-lg">
-      <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest mb-4 font-doto"><i
+      <h2 class="text-xs font-bold text-black/70 uppercase tracking-widest mb-4 font-doto"><i
           class="fa-solid fa-clock-rotate-left mr-2"></i>Session History</h2>
       <div id="sessionList" class="flex flex-col gap-2"></div>
     </div>
@@ -237,7 +237,7 @@
     <!-- AI Analysis -->
     <div class="glass rounded-3xl p-6 border border-black/8 shadow-lg" id="aiPanel">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xs font-bold text-black/50 uppercase tracking-widest font-doto"><i class="fa-solid fa-robot mr-2"></i>AI
+        <h2 class="text-xs font-bold text-black/70 uppercase tracking-widest font-doto"><i class="fa-solid fa-robot mr-2"></i>AI
           Career Analysis</h2>
         <button onclick="generateAnalysis()" id="analyzeBtn"
           class="px-5 py-2 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full hover:bg-black/80 transition-colors flex items-center gap-2 font-doto">
@@ -314,7 +314,7 @@
       const mins = Math.floor((s.duration_seconds || 0) / 60), secs = (s.duration_seconds || 0) % 60;
       return `<div class="flex items-center gap-3 p-3 rounded-xl border border-black/5 bg-white/50">
         <span class="font-doto text-xs font-black text-black/30 w-6">#${i + 1}</span>
-        <div style="font-family:'Doto',monospace;font-size:1.4rem;font-weight:900;color:${color};min-width:48px">${score}<span style="font-size:.7rem;font-weight:400;color:rgba(0,0,0,.3)">%</span></div>
+        <div style="font-family:'Poppins',sans-serif;font-size:1.4rem;font-weight:900;color:${color};min-width:48px;letter-spacing:-0.02em">${score}<span style="font-size:.7rem;font-weight:400;color:rgba(0,0,0,.3)">%</span></div>
         <div class="flex-1"><span class="text-xs text-black/50">${mins}m ${String(secs).padStart(2, '0')}s</span></div>
         ${badge}
         <span class="text-[0.6rem] text-black/30">${s.phase_failed ? 'Failed @ ' + s.phase_failed : ''}</span>
